@@ -2,14 +2,20 @@
 Repository for the R&amp;DD assignment of the Software Engineering 2 course at Politecnico di Milano made by Alessandro Burato, Gabriele Crimella and Davide Faccini. The goal of the assignment is to create RASD + DD documents of the following problem (all informations, including the original assignment + rules are to be found in the Materials folder).
 
 ## Best Bike Paths
-A biker’s association has decided to develop Best Bike Paths (BBP), a new software system supporting users in creating and browsing through an inventory of bike paths. Registered users can use the application to record their trips and store them to keep track of their
+A biker’s association has decided to develop **Best Bike Paths (BBP)**, a new software system supporting users in creating and browsing through an inventory of bike paths. Registered users can use the application to record their trips and store them to keep track of their
 cycling activities. The system provides various statistics about each trip, such as the total distance covered, average speed, and other performance metrics. When available, the application can enrich trip data with meteorological information—such as weather conditions, temperature, and wind
 speed—retrieved from an external service. Moreover, registered users can insert and make publishable information about bike paths, including
 their status (e.g., optimal, medium, sufficient, requires maintenance, ...) and the presence of relevant obstacles, for instance, potholes. A bike path is intended to be one where a proper bike track exists or where cars are rare and speed limits are compatible with the average speed of a bike.
 Insertion of information in the system can happen in two ways.
-
-Manual mode: users insert the data manually, specifying the name of the streets in the path and their status.
-
-Automated mode: users let BBP acquire data from their mobile devices while they bike. BBP should guess the user is biking given their speed; it should collect GPS information to reconstruct the followed path, and, at the same time, it should acquire data from the mobile device’s accelerometer and gyroscope to keep track of any significant movement of the device itself that suggests the presence of potholes or other problems. Since there is the possibility of having false positives (e.g., non-existent potholes), the user will have to confirm or correct the information acquired by BBP before this is made available to the community.
+- **Manual mode**: users insert the data manually, specifying the name of the streets in the path and their status.
+- **Automated mode**: users let BBP acquire data from their mobile devices while they bike. BBP should guess the user is biking given their speed; it should collect GPS information to reconstruct the followed path, and, at the same time, it should acquire data from the mobile device’s accelerometer and gyroscope to keep track of any significant movement of the device itself that suggests the presence of potholes or other problems. Since there is the possibility of having false positives (e.g., non-existent potholes), the user will have to confirm or correct the information acquired by BBP before this is made available to the community.
 
 As mentioned, information provided to BBP either manually or automatically can be made publishable by the owner. Any user, either registered or not, can take advantage of the information collected by BBP. Users can specify an origin and a destination and ask the system to visualize on a map the bike path(s) between these two points. If multiple paths exist, BBP visualizes them based on their score. The path score is computed based on the status of the path and on how effective the path is to let the user reach the destination from the given origin. If BBP collects publishable information about some paths from multiple users, it merges the different pieces of information considering their freshness and the number of confirming data obtained. For example, if a path is tagged as “optimal” by two users and as “requiring maintenance” by another and the three users introduce the information in the system in the same timeframe, BBP will consider the path as optimal, unless further information arrives.
+
+## Group Goals
+The goal of the project is to define the RASD and DD for BBP. The task is different for groups of different sizes. The group is composed by a total of three members, hence we will focus on the aspect of the application concerning:
+- The recording of personal trips
+- The insertion of publishable information in manual mode.
+- The visualization of the information about possible paths between an origin and a destination specified by the user.
+- The insertion of publishable information in automated mode and its confirmation by the user.
+- The merging of information incoming from different users (last paragraph in the description above).
