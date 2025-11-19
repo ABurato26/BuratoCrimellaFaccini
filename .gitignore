@@ -1,3 +1,5 @@
+## Core texmaker session xml
+*.tks
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
