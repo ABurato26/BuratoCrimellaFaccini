@@ -15,7 +15,7 @@
 %	HANDLING THE STYLE OF THE THESIS
 %--------------------------------------------------------------------------
 \LoadClass[12pt, twoside]{book} % 12 pt font, two-sided book style
-\RequirePackage[a4paper, includehead, headheight=0.6cm, inner=3.0cm ,outer=2.0cm, top=2.5cm, bottom=2.5cm]{geometry}
+\RequirePackage[a4paper, includehead, headheight=0.6cm, inner=2.0cm ,outer=1.8cm, top=2.0cm, bottom=2.0cm]{geometry}
 
 \RequirePackage[bf, font=onehalfspacing]{caption} % caption: FIG in bold, 1.5 line spacing in figure and table captions
 \newcommand{\thesisspacing}{\onehalfspacing}
@@ -110,27 +110,23 @@
 			\vfill
 			%\begin{minipage}{0.95\textwidth}
 			\begin{minipage}{0.95\textwidth}
-            \includegraphics[trim={1.2cm 0 0 0},clip, width=0.7\textwidth]{Images/02_ING_IND_INFORMAZIONE_COL_POSITIVO.eps}
+            \includegraphics[trim={0cm 0 0 0},clip, width=0.7\textwidth]{Images/logo_polimi_scritta2.eps}
             \hfill
             \\
 			\vspace{2.5cm}
 			\\
 			{{\color{bluepoli} \singlespacing \huge \bfseries \thesistitle \par}}	
 			\vspace{1.5cm}
-			{\color{bluepoli} \bfseries \large{\textsc{Tesi di Laurea Magistrale in\\ \course}}\par}
+			{\color{bluepoli} \bfseries \large{\textsc{RASD document for the \\ Software Engineering 2 course assignment}}\par}
 			\vspace{1.5 cm}
-			{\color{black} \Large {Author:} \bfseries{\name}}
+			{\color{black} \Large {Authors:} \bfseries{\name}}
 			\end{minipage}
 			\\
 			\vspace*{\fill}
 			\\
 			\begin{minipage}{0.85\textwidth}
 			\normalsize{
-			Student ID: {\ID}
-			\\
-			Advisor: {\advisor}
-			\\
-			Co-advisors: {\coadvisor}
+			Teacher: {\advisor}
 			\\
 			Academic Year: {\academicyear}
 			}

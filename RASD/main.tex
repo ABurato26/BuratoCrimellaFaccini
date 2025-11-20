@@ -1,5 +1,5 @@
 % This template is freely taken by the MSc thesis template from School of
-%Industrial and Information Engineering at Politecnico di Milano.
+% Industrial and Information Engineering at Politecnico di Milano.
 % Source: https://www.ingindinf.polimi.it/en/students/lessons-and-exams/
 % bachelors-and-masters-degree-exams/thesis-format-templates
 
@@ -58,6 +58,7 @@
 \usepackage{tabularx}
 \usepackage{longtable} % Tables that can span several pages
 \usepackage{colortbl}
+\usepackage{booktabs}
 
 % PACKAGES FOR ALGORITHMS (PSEUDO-CODE)
 \usepackage{algorithm}
@@ -76,7 +77,7 @@
 \usepackage{fancyhdr} % For the headers
 \fancyhf{}
 
-% Input of configuration file. Do not change config.tex file unless you really know what you are doing. 
+% Input of configuration file
 \input{Configuration_Files/config}
 
 % Custom command to add absolute path
@@ -90,20 +91,14 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}}
 
-%----------------------------------------------------------------------------
-%	TITLE PAGE
-%----------------------------------------------------------------------------
-
+%--- Start of title page
 \pagestyle{empty} % No page numbers
-\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the preamble pages
+\frontmatter % Roman page numbering style 
 
 \puttitle{
-    title={RASD -- Requirement Analysis and Verification Document}, % Title of the project
+    title={Best Bike Paths -- RASD Document}, % Title of the project
     name={Alessandro Burato, Gabriele Crimella, Davide Faccini}, % Student names
-    course={Software Engineering 2 }, % Course / context
-    ID=,  % Student ID number (numero di matricola) - leave blank if not applicable
     advisor={Elisabetta Di Nitto}, % Supervisor name
-    coadvisor={}, % No co-supervisor
     academicyear={2025-26},  % Academic Year
 } % These info will be put into your Title page 
 
