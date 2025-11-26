@@ -1,23 +1,129 @@
 \section{Purpose}
+The primary purpose of this project, initiated by a leading Bike Association,
+is to develop and deploy an advanced support system for the cycling community designed
+to thrive within a transport landscape dominated by cars.
+
+The core idea is to foster
+a collaborative digital environment where cyclists can actively record, consult,
+and publish both their own and other users' riding paths.
+
+This platform will serve as the definitive centralized resource for finding highly recommended routes tailored
+precisely to the user's specific experience, preferences, and safety considerations.
+
+Ultimately, the system aims to significantly enhance the quality of the cycling experience
+by providing verified, community-rated routes, thereby connecting riders and making
+high-quality path discovery universally accessible
+
 \subsection{Goals}
 Here are the goals that BBP has to fulfill. BBP has to:
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{Goal} & \textbf{Description} \\ \hline
+G1 & Recognize suitable bike paths \\ \hline
+G2 & Allow the user to browse different bike paths \\ \hline
+G3 & Allow the user to see bike paths statistics \\ \hline
+G4 & Allow the user to search for paths between two locations \\ \hline
+G5 & Allow the user to see paths optimality based on other registered users' reviews \\ \hline
+G6 & Allow user to see weather information when available \\ \hline
+G7 & Allow users to register to the application using credentials \\ \hline
+G8 & Allow registered user to review published bike paths \\ \hline
+G9 & Allow registered user to confirm or reject false positives in track recording \\ \hline
+G10 & Allow registered user to let the system automatically record suitable bike paths \\ \hline
+G11 & Allow registered user to manually create suitable bike paths \\ \hline
+G12 & Allow registered user to publish bike paths \\ \hline
+G13 & Allow the store of bike paths data for registered users \\ \hline
+G14 & Allow registered user to add publishable information about bike paths \\ \hline
+\end{tabularx}
+\caption{List of Goals}
+\label{tab:goals}
+\end{table}
+
+\section{Scope}
+\subsection{World Phenomena}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{WP} & \textbf{Description} \\ \hline
+WP1 & A user physically moves through space using a bicycle \\ \hline
+WP2 & The physical conditions of a bike path or street change (e.g., presence of potholes, road maintenance status, or obstacles) \\ \hline
+WP3 & The meteorological conditions in the geographic area vary (e.g., temperature, wind speed) \\ \hline
+WP4 & A user intends to reach a specific destination starting from a specific origin point \\ \hline
+\end{tabularx}
+\caption{World Phenomena}
+\label{tab:world-phenomena}
+\end{table}
+
+
+\subsection{Machine Phenomena}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{MP} & \textbf{Description} \\ \hline
+MP1 & The system guesses that the user is biking by analyzing the detected speed \\ \hline
+MP2 & The system computes statistics related to a trip (e.g., total distance covered, average speed, performance metrics) \\ \hline
+MP3 & The system identifies potential anomalies (e.g., potholes) by processing raw data from the device sensors (accelerometer and gyroscope) \\ \hline
+MP4 & The system computes the score of a path based on its status and its effectiveness in reaching the destination \\ \hline
+MP5 & The system merges path information incoming from multiple users, evaluating data freshness and the number of confirmations received \\ \hline
+MP6 & The system stores trip history and path information in the database for future retrieval \\ \hline
+\end{tabularx}
+\caption{Machine Phenomena}
+\label{tab:machine-phenomena}
+\end{table}
+
+
+\subsection{Shared Phenomena}
+\textbf{World-Controlled Phenomena}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{SP\_WC} & \textbf{Description} \\ \hline
+SP\_WC1 & The user sends a command to start or stop recording a trip \\ \hline
+SP\_WC2 & The mobile device sensors (GPS, accelerometer, gyroscope) transmit position and movement data to the system \\ \hline
+SP\_WC3 & The user manually inserts data regarding a street (e.g., street name, status) \\ \hline
+SP\_WC4 & The user confirms or corrects information automatically detected by the system (e.g., confirming a pothole) \\ \hline
+SP\_WC5 & The user inputs search parameters for a path (origin and destination) \\ \hline
+SP\_WC6 & The external weather service transmits current condition data (e.g., temperature, wind) to the system \\ \hline
+\end{tabularx}
+\caption{Shared Phenomena -- World-Controlled}
+\label{tab:shared-sp-wc}
+\end{table}
+
+
+\textbf{Machine-Controlled Phenomena}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{SP\_MC} & \textbf{Description} \\ \hline
+SP\_MC1 & The system visualizes available bike paths between two points on a map, highlighting those with better scores \\ \hline
+SP\_MC2 & The system displays trip statistics to the user (speed, distance, etc.) \\ \hline
+SP\_MC3 & The system presents a confirmation request to the user regarding automatically detected information \\ \hline
+
+\end{tabularx}
+\caption{Shared Phenomena -- Machine-Controlled}
+\label{tab:shared-sp-mc}
+\end{table}
+
+\section{Definitions, Acronyms, Abbreviations}
 \begin{itemize}
-	\item G1: Recognize suitable bike paths
-	\item G2: Allow the user to browse different bike paths
-	\item G3: Allow the user to see bike paths statistics
-	\item G4: Allow the user to search for paths between two locations
-	\item G5: Allow the user to see paths optimality based on other registered users' reviews	
-	\item G6: Allow user to see weather information when available
-	
-	\item G7: Allow users to register to the application using credentials
-	\item G8: Allow registered user to review published bike paths	
-	\item G9: Allow registered user to confirm or reject false positives in track recording
-	\item G10: Allow registered user to let the system to automatically record suitable bike paths
-	\item G11: Allow registered user to manually create suitable bike paths 
-	\item G12: Allow registered user to publish bike paths
-	\item G13: Allow the store of bike paths data for registered users
-	\item G14: Allow registered user to add publishable information about bike paths
-	
-	
-	
+	\item BBP: Bike Buddy Project
+	\item RASD: Requirements Analysis and Specification Document
+	\item WP: World Phenomenon
+	\item MP: Machine Phenomenon
+	\item SP\_WC: Shared Phenomenon - World Controlled
+	\item SP\_MC: Shared Phenomenon - Machine Controlled
 \end{itemize}
+
+\section{Reference Documents}
+\begin{itemize}
+	\item Specification document assignment
+	\item IEEE standard documentation for RASD
+	\item Materials for the Software Engineering 2 course made available on WeBeep
+\end{itemize}
+\section{Document Structure}
