@@ -1,1 +1,73 @@
-Chapter 3
+
+\section{Functional Requirements}
+\subsection{Requirements}
+
+\begin{longtable}{|l|p{16cm}|} 
+    % --- INTESTAZIONE FIRST PAGE --- 
+    \hline
+    \textbf{ID} & \textbf{Description} \\ \hline
+    \endfirsthead
+
+    % --- INTESTAZIONE NEXT PAGES ---
+    \hline
+    \textbf{ID} & \textbf{Description} \\ \hline
+    \endhead
+
+    % --- PIÈ DI PAGINA ---
+    \hline
+    \multicolumn{2}{r}{\textit{Continue in the next page...}} \\
+    \endfoot
+
+    % --- PIÈ DI PAGINA last page---
+    \caption{Requirements List} \\
+    \hline
+    \endlastfoot
+
+    % --- DATA ---
+    R1 & The system shall allow new users to register an account \\ \hline
+        R2 & The system shall allow user not registered to access without an account if they don't want to register\\ \hline
+        R3 & The system shall allow registered users to log in to the application \\ \hline
+        R4 & The system shall allow registered users to view and update their personal profile information \\ \hline
+        R5 & The system shall allow users to log out of their current session \\ \hline
+        R6 & The system shall allow registered users to record their cycling trips \\ \hline
+        R7 & The system shall store recorded trips to maintain a history of the user's cycling activities \\ \hline
+        R8 & The system shall compute and display total distance covered for each trip \\ \hline
+        R9 & The system shall compute and display average speed for each trip \\ \hline
+        R10 & The system shall compute and display total time spent speed for each trip \\ \hline
+        R11 & The system shall compute and display elevation gain for each trip \\ \hline
+        R12 & The system shall compute and display calories spent for each trip \\ \hline
+        R13 & The system shall compute and display additional performance metrics for the trips \\ \hline
+        R14 & The system shall retrieve meteorological data (weather conditions, temperature, wind speed) from an external service and enrich the trip data when available \\ \hline
+        R15 & The system shall allow registered users to insert information about bike paths \\ \hline
+        R16 & The system shall allow registered users to make publishable information about bike paths \\ \hline
+        R17 & The system shall allow registered users to add info about the status of a bike path \\ \hline
+        R18 & The system shall allow registered users to add the presence of relevant obstacles on the bike path \\ \hline
+        R19 & The system shall recognise if the users are cycling on an exists bike path \\ \hline
+        R20 & The system shall recognise if the users are cycling on a path where cars are rare and speed limits under 50kmh \\ \hline
+        R21 & The system shall calculate the distance of a path \\ \hline
+        R22 & The system shall allow registered users to manually insert bike path data by specifying the names of the streets included in the path \\ \hline
+        R23 & The system shall allow registered users to manually specify the status of the street \\ \hline
+        R24 & The system shall allow users to manually report the presence of obstacles on the street \\ \hline
+        R25 & The system shall automatically infer that the registered user is cycling based on their speed \\ \hline
+        R26 & The system shall collect GPS data to reconstruct the path followed by the user during the ride \\ \hline
+        R27 & The system shall acquire data from the mobile device's accelerometer and gyroscope to detect basic metrics\\ \hline
+        R28 & The system shall analyze sensor data to identify potential path irregularities \\ \hline
+        R29 & The system shall require the user to confirm or correct the automatically acquired data \\ \hline
+        R30 & The system shall allow registered users to mark their inserted data as "publishable" to make it available to the community \\ \hline
+        R31 & The system shall merge information about the same path from multiple users \\ \hline
+        R32 & The system shall prioritize data based on timeframe of execution and the number of confirmations to determine the current status \\ \hline
+        R33 & The system shall allow any user to search for bike paths by specifying an origin and a destination \\ \hline
+        R34 & The system shall find for its data bike paths where an origin and a destination are specified by any users \\ \hline
+        R35 & The system shall visualize the bike paths connecting the specified origin and destination on a map \\ \hline
+        R36 & The system shall compute a score for each path based on its status and its effectiveness in reaching the destination from the origin \\ \hline
+        R37 & If multiple paths exist, from the user's request the system shall display them sorted by their calculated score \\ \hline
+\end{longtable}
+
+\vspace{2cm}
+\subsection{Use Cases Diagrams}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.6]{UseCases.drawio.pdf}
+    \caption{Use Cases}
+\end{figure}
