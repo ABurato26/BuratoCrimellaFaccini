@@ -1,60 +1,87 @@
 // Best Bike Paths model for alloy specification
 
-sig Coordinates{}
+abstract sig Status{}
+one sig Clear extends Status{}
+one sig Hole extends Status{}
+
+sig Score{}
 
 sig Statistics{}
 
-sig Node{
-	position: one Coordinates
+sig Street{
+	status: one Status
 }
 
 sig Path{
-	start: one Node,
-	middle: set Node,
-	end: one Node
+	sequence: seq Street,
+	score: Score
+}{
+	#sequence>0
 }
 
 sig Trip{
 	path: one Path,
-	internalStats: one Statistics,
+	averageSpeed: one Statistics,
+	duration: one Statistics,
 	externalStats: lone Statistics
+}{
+	averageSpeed != duration and duration != externalStats
 }
 
-sig User{
-	
-}
-
-sig RegisteredUser extends User{
+sig RegisteredUser {
 	registeredTrips: set Trip
 }
 
-// every trip has a user that registered itUser
-fact tripsFromUsers{
-	all t: Trip| one ru: RegisteredUser | t in ru.registeredTrips
+// one street cannot have itself as following
+fact noSameFollowingStreet{
+	all p: Path|
+		all i: p.sequence.inds - max[p.sequence.inds]|
+			p.sequence[i] != p.sequence[i+1]
+}
+
+// a street exists only if connected with a path
+fact streetsExistsWithPaths{
+	all s: Street|
+		some p: Path|
+			s in p.sequence.elems
+}
+
+// a path exists only if connected with a trip
+fact pathsExistWithTrips{
+	all p: Path|
+		some t: Trip|
+			t.path = p
+		
+}
+
+// a statistic exists only if connected with a trip
+fact statisticsExistWithTrips{
+	all s: Statistics|
+		some t: Trip|
+			t.averageSpeed = s or
+			t.duration = s or
+			t.externalStats = s
+}
+
+// a trip exists only if connected with a user that registered it
+fact tripsExistWithUsers{
+	all t: Trip|
+		some u: RegisteredUser|
+			t in u.registeredTrips
 }
 
 // every trip is different (even if the path could be the same)
-fact differentTrips{
-    all ru1, ru2: RegisteredUser |
-        ru1 != ru2 implies no (ru1.registeredTrips & ru2.registeredTrips)
-}
-
-// coordinates of start, middle and finish must be different
-fact differentCoordinates{
-	all p: Path| (p.start != p.end)  
-}
-
-// brute force number of trips
-fact threeTripsForUser{
-	all ru: RegisteredUser| #(ru.registeredTrips) = 3
+fact differentTripsForDifferentUsers{
+	all t1, t2: Trip|
+		all u1, u2: RegisteredUser|
+			((t1 in u1.registeredTrips) and (t2 in u2.registeredTrips) and (t1 = t2))
+			implies
+			(u1 = u2)
 }
 
 
 run {} for
-    30
-    but exactly 4 RegisteredUser,
-        exactly 12 Trip,
-        exactly 9 Path,
-        exactly 15 Node,
-        exactly 15 Coordinates,
-        exactly 9 Statistics
+    40
+    but exactly 8 RegisteredUser,
+        exactly 6 Street,
+        exactly 10 Trip
