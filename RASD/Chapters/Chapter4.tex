@@ -56,3 +56,4 @@ A Trip is an object that has one single path, the statistics associated with the
     caption={RegisteredUser signature},
     label={lst:registereduser-sig}
 ]{Alloy/002_BBPv2.als}
+A RegisteredUser models a user with ability to record trips. We decided not to model Guests in Alloy because the functionalities we wanted to test are used only by users with an account, so the users that we used have published trips and registered trips, where the published trips are naturally a subset of the registered ones.
