@@ -75,23 +75,25 @@ fun showPath[p: Path] : set Segment{
 	
 fact segmentsFacts{
 
-	/** Segments are saved only if associated with another segment or a Path
-	(and at least an object Path is needed in the chain) **/
+	// Segments are saved only if associated with another 
+	// segment or a Path (and at least an object Path 
+	// is needed in the chain)
 	all s: Segment| (
 		some ss: Segment| 
-			ss.nextSegment = s  or some p: Path| p.start = s)
+			ss.nextSegment = s  or 
+			some p: Path| p.start = s)
 
 	all s: Segment|
 		// if segment is last in chain or in a cycle
-		(s.nextSegment = none or s in s.^nextSegment) implies (
-		// then from said segment i can walk backwards until i find a path's start
-		some p: Path | 
-			p.start in s.^~nextSegment)
+		(s.nextSegment = none or s in s.^nextSegment) implies 
+		// then from said segment i can walk backwards 
+		// until i find a path's start
+		(some p: Path | p.start in s.^~nextSegment)
 }
 
 fact pathsFacts{
-	/** Paths are equal if the segments inside are the same sequence of 
-	objects **/
+	// Paths are equal if the segments inside 
+	// are the same sequence of objects
 	all p1,p2: Path|
 		p1 != p2 implies (
 			showPath[p1] != showPath[p2])
@@ -99,7 +101,8 @@ fact pathsFacts{
 
 
 /** When building a path, it is mandatory that streets are well connected
-	(such as NodeB of the i street is connected to NodeA of the i+1 street) **/
+	(such as NodeB of the i street is connected to NodeA of the i+1 
+	street) **/
 
 run {} for 50 but 
 		exactly 10 Trip,

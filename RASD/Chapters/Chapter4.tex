@@ -2,7 +2,6 @@ For readability and simplicity motivations we decided to insert the most importa
 
 \section{Signatures}
 
-% Status
 \subsection{Status}
 \lstinputlisting[
     firstline=11,
@@ -11,8 +10,7 @@ For readability and simplicity motivations we decided to insert the most importa
     label={lst:status-sig}
 ]{Alloy/002_BBPv2.als}
 An object Status is used to be associated with a street segment, therefore allowing us to better describe streets and to introduce potholes. The actual signature is abstract since we wanted to make the object expandable with more variants (we added Clear, RoadWork and Pothole as examples).
- 
-% Segment
+
 \subsection{Segment}
 \lstinputlisting[
     firstline=16,
@@ -57,3 +55,15 @@ A Trip is an object that has one single path, the statistics associated with the
     label={lst:registereduser-sig}
 ]{Alloy/002_BBPv2.als}
 A RegisteredUser models a user with ability to record trips. We decided not to model Guests in Alloy because the functionalities we wanted to test are used only by users with an account, so the users that we used have published trips and registered trips, where the published trips are naturally a subset of the registered ones.
+
+
+\section{Facts}
+We then need to 
+
+\subsection{Segment facts}
+\lstinputlisting[
+    firstline=76,
+    lastline=92,
+    caption={segmentsFacts fact},
+    label={lst:segmentFacts-fact}
+]{Alloy/002_BBPv2.als}

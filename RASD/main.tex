@@ -81,11 +81,16 @@
 % NEW INSERTIONS
 \usepackage{listings}	% Package to use external code snippets
 \lstset{					% Additional styling
+	keywordstyle=\color{red}\bfseries,
+	keywordstyle=[2]\color{blue}\bfseries,
+	morekeywords={sig, fact, this},
+	morekeywords=[2]{abstract, extends, one, some, lone, all, in, and, or, set},
     basicstyle=\ttfamily\small,
     numbers=left,
     numberstyle=\tiny,
     frame=single,
     	captionpos=b,
+    	tabsize=4
 }
 \input{Configuration_Files/config} % Input of configuration file
 \newcommand{\folder}{Chapters/}	% Custom command to add absolute path
