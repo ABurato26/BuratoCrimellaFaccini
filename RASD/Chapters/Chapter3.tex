@@ -74,12 +74,12 @@
 
 
 %Qui devi metterci delle scritte per spiegare un minimo i grafici
+%----
 \vspace{2cm}
 
 \subsection{Use Cases}
-
-%Testo introduttivo al paragrafo
-In this section, they are explained and represented the main identified use cases.  For each Use Case, the documentation follows a two-step structure:
+In this section, they are explained and represented the main identified use cases.  
+For each Use Case, the documentation follows a two-step structure:
 \begin{itemize}
     \item 1. Use Case Table: A structured table detailing specific fields
     \item 2. Diagram: A Sequence Diagram visualizing the steps described in the table
@@ -389,3 +389,216 @@ In this section, they are explained and represented the main identified use case
     \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
     \caption{Account Settings}
 \end{figure}
+
+\newpage
+
+\subsection{Mapping on Goals}
+
+%Goal 1
+\textbf{G1 : Recognize suitable bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 2
+\textbf{G2 : Allow the user to browse different bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 3
+\textbf{G3 : Allow the user to see bike paths statistics}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 4
+\textbf{G4 : Allow the user to search for paths between two locations}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 5
+\textbf{G5 : Allow the user to see paths optimality based on other registered users' reviews}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 6
+\textbf{G6 : Allow user to see weather information when available}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 7
+\textbf{G7 : Allow users to register to the application using credentials}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 8
+\textbf{G8 : Allow registered user to review published bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 9
+\textbf{G9 : Allow registered user to confirm or reject false positives in track recording}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 10
+\textbf{G10 : Allow registered user to let the system automatically record suitable bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 11
+\textbf{G11 : Allow registered user to manually create suitable bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 12
+\textbf{G12 : Allow registered user to publish bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 13
+\textbf{G13 : Allow the store of bike paths data for registered users}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+\vspace{1cm}
+
+%Goal 14
+\textbf{G14 : Allow registered user to add publishable information about bike paths}
+\begin{itemize}
+    \item \textbf{R1:} abc
+    \item \textbf{R2:} abc
+\end{itemize}
+
+%Mapping Table
+\newpage
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{4pt}
+
+\begin{longtable}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Req.} & \textbf{G1} & \textbf{G2} & \textbf{G3} & \textbf{G4} & \textbf{G5} & \textbf{G6} & \textbf{G7} & \textbf{G8} & \textbf{G9} & \textbf{G10} & \textbf{G11} & \textbf{G12} & \textbf{G13} & \textbf{G14} \\ \hline
+\endhead
+
+% --- DATA ---
+R1 & $\checkmark$ & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R2 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R3 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R4 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R5 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R6 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R7 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R8 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R9 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R10 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R11 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R12 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R13 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R14 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R15 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R16 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R17 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R18 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R19 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R20 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R21 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R22 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R23 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R24 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R25 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R26 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R27 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R28 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R29 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R30 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R31 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R32 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R33 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R34 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R35 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R36 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R37 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+\caption{Mapping Requirements on Goals}
+\end{longtable}
+
+\section{Performance Requirements}
+The system relies heavily on real-time data acquisition, geospatial processing, and user interaction through 
+mobile devices. Therefore, specific performance constraints must be met to ensure a proper user experience and the 
+integrity of the collected data.
+
+\begin{itemize}
+    \item \textbf{Response Time and Latency:}  The system must ensure low latency during critical user interactions to maintain usability. Specifically, for general browsing and viewing of bike paths, the system should render map visualizations and path details within 3 seconds of a user's request, assuming a standard 4G/5G connection. For the route-finding feature, the algorithm computing the path score and optimal route must complete execution within 5 seconds. Regarding the "Automated mode," the system is required to process sensor inputs (accelerometer and gyroscope) and GPS data in real-time. The lag between the physical detection of an obstacle and its internal logging on the device should be very reduced to ensure accurate timestamping and location tagging. However, the complex merging of data from the same path can be performed asynchronously on the server side, provided that the updated status becomes available to the community within a reasonable timeframe like 5 minutes of data upload
+    \item \textbf{Number of Concurrent Users:} As a community-driven platform managed by a biker's association, BBP must support a significant number of concurrent users, particularly during periods where the numbers of bikers could increase a lot, such as weekends and holidays. The system backend must be capable of handling at least 1,000 concurrent active sessions without performance degradation
+    \item \textbf{Data Storage and Capacity:} The storage infrastructure must be designed to accommodate high-volume geospatial and time-series data. Since the application records continuous GPS tracks, along with high-frequency accelerometer and gyroscope readings for obstacle detection, the database will grow rapidly. The system requires a scalable storage solution capable of archiving historical trip data while keeping active path inventories and recent statistics immediately accessible. Provisioning should be made for storing several Terabytes of data over the first few years of operation, with a strategy for data retention that prioritizes the freshness of path conditions
+    \item \textbf{Network Bandwidth and Connectivity:} The system must be resilient to variable network conditions. The application should optimize data transmission to minimize bandwidth usage, which is crucial for users with limited data plans. In "Automated mode," the system must implement a "store-and-forward" mechanism: if the user enters an area with poor or no connectivity, the application must locally buffer all GPS and sensor data. Once connectivity is restored, the system should upload the accumulated data without freezing the user interface or interrupting the ongoing recording of the trip. The transmission of external meteorological data should be lightweight, fetching updates only at necessary intervals rather than continuously streaming, to preserve bandwidth
+    \item \textbf{Energy Efficiency:} A critical performance requirement for the system's component is battery consumption. The simultaneous usage of the GPS module, accelerometer, gyroscope, and background processing algorithms constitutes a high energy drain. The application must be optimized to ensure that running the "Automated mode" doesn't reduce a standard smartphone battery excessively fast. The optimal target should be to allow a user to track a continuous ride of at least 5 to 8 hours on a fully charged device
+
+\end{itemize}
+
+\section{Design Constraints}
+The design and development of the Best Bike Paths (BBP) system must adhere to specific boundaries imposed 
+by the operational environment, regulatory requirements, and the technological limitations of the end-user devices.
+These constraints influence the architectural decisions and the selection of technologies to ensure the system is robust, 
+legal, and usable.
+
+\subsection{Standard compliance}
+Given the nature of the application, which involves the collection, storage, and processing of user data and geolocation tracking,
+the system must strictly comply with relevant data protection regulations. Specifically, since the application tracks users' movements 
+and associate trips with registered profiles, adherence to EU's GDPR (General Data Protection Regulation) is mandatory.
+Moreover, the system relies on external services. Therefore, it must comply with standard geospatial data formats to ensuring interoperability 
+with standard mapping APIs and the navigation modules. The communication between the mobile application, the backend server, and the external 
+meteorological service must adhere to modern security standards, necessitating the use of HTTPS and TLS protocols to encrypt data in transit. 
+Finally, the integration of weather data implies compliance with the specific API standards provided by the chosen third-party meteorological service provider.
+
+\subsection{Hardware limitations}
+The "Automated mode" of the BBP application introduces significant hardware dependencies that act as constraints on the system's 
+availability and performance. The primary limitation is the dependence on specific mobile sensors. For the application to function user's mobile device 
+must be equipped with a high-precision GPS receiver, an accelerometer, and a gyroscope. Additionally, the continuous usage of these sensors imposes a constraint 
+regarding battery consumption. The design must optimize sensor polling rates to prevent excessive battery drainage, which would negatively impact the user experience 
+during long bike trips. Finally, the system is constrained by network connectivity hardware. While the application collects data locally, the features related to 
+retrieving meteorological information, publishing path data, and merging crowd-sourced information require an active internet connection. The system design must, 
+therefore, account for intermittent connectivity scenarios, typical of outdoor cycling routes, by implementing local caching mechanisms until a stable connection is re-established.
+
+\section{Software System Attributes}
+abc
+
+\subsection{Reliability}
+\subsection{Availability}
+\subsection{Security}
+\subsection{Maintainability}
+\subsection{Portability}
