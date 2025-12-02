@@ -7,32 +7,40 @@
 /** For modelling purposes, segments are different even if not (imagine a
 	map-like interaction with common nodes **/
 
-abstract sig Status{}				// status of the roads (expandible)
+// status of the roads (expandible)
+abstract sig Status{}				
 one sig Clear extends Status{}
-one sig Hole extends Status{}
-
-sig Statistics{}{
-	// Statistics are saved only if associated with at least a trip
-	some t: Trip| t.averageSpeed = this 
-	or t.duration = this 
-	or t.externalStats = this
-}					
+one sig RoadWork extends Status{}
+one sig Pothole extends Status{}
 
 sig Segment{
 	nextSegment: lone Segment,
-	status: Status
+	status: some Status
 }{
-	// a segment cannot point to itself as next (but cycles are allowed)
-	nextSegment != this
+	// a segment cannot point to itself as next 
+	// (but cycles are allowed)
+	nextSegment != this 
+
+	// if status is clear then its the only status possible
+	Clear in status implies #status = 1
 }
 
 sig Path{
 	start: Segment,
 	score: Int
 }{
-	// Paths are saved only if associated with at least a Trip
+	// Paths are saved only if associated with 
+	// at least a Trip
 	some t: Trip| t.path = this
 }
+
+sig Statistics{}{
+	// Statistics are saved only if associated 
+	// with at least a trip
+	some t: Trip| t.averageSpeed = this 
+	or t.duration = this 
+	or t.externalStats = this
+}					
 
 sig Trip{
 	path: one Path,
@@ -43,8 +51,9 @@ sig Trip{
 	// statistics are different
 	averageSpeed != duration and duration != externalStats
 
-	// Trips are saved only if associated with at least a registered user
-	some u: RegisteredUser| this in u.registeredTrips
+	// Trips are saved only if associated with 
+	// at least a registered user
+	one u: RegisteredUser| this in u.registeredTrips
 }
 
 sig RegisteredUser {
@@ -92,7 +101,7 @@ fact pathsFacts{
 /** When building a path, it is mandatory that streets are well connected
 	(such as NodeB of the i street is connected to NodeA of the i+1 street) **/
 
-run {} for 20 but 
-		exactly 7 Trip,
-		exactly 5 Path,
-		exactly 5 Segment
+run {} for 50 but 
+		exactly 10 Trip,
+		exactly 7 Path,
+		exactly 30 Segment

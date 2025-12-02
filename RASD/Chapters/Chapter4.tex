@@ -1,8 +1,58 @@
-In this chapter we will focus on the testing of particular specifications using 
-Alloy.
- 
-What do we model
-How do we model it
-Assumptions
+For readability and simplicity motivations we decided to insert the most important objects of the model simplifying the complex ones (for example, individual nodes of streets are not modeled) and we kept what we thought was essential to verify simple assertions.
 
-Alloy snippets
+\section{Signatures}
+
+% Status
+\subsection{Status}
+\lstinputlisting[
+    firstline=11,
+    lastline=14,
+    caption={Status signature},
+    label={lst:status-sig}
+]{Alloy/002_BBPv2.als}
+An object Status is used to be associated with a street segment, therefore allowing us to better describe streets and to introduce potholes. The actual signature is abstract since we wanted to make the object expandable with more variants (we added Clear, RoadWork and Pothole as examples).
+ 
+% Segment
+\subsection{Segment}
+\lstinputlisting[
+    firstline=16,
+    lastline=26,
+    caption={Segment signature},
+    label={lst:segment-sig}
+]{Alloy/002_BBPv2.als}
+An object Segment is used to model street segments: every segment is connected to at most another segment (forming what actively is a chain of streets). To have consistent segments, they are to be considered as a part of a physical street and they also model direction of said street: therefore two different segments can be the same street segment but traversed in opposite direction, this implies that a necessary condition that we need to add is that a segment cannot connect to itself.
+
+\subsection{Path}
+\lstinputlisting[
+    firstline=28,
+    lastline=35,
+    caption={Path signature},
+    label={lst:path-sig}
+]{Alloy/002_BBPv2.als}
+Following the definition of a Segment, a Path is simply an objects that keeps the first segment of an arbitrairly long chain of segments. Paths also have a score and, since paths are discovered and inserted by RegisteredUsers, it is necessary that a Trip (see Trip signature) has said Path associated to it.
+
+\subsection{Statistics}
+\lstinputlisting[
+    firstline=37,
+    lastline=43,
+    caption={Statistics signature},
+    label={lst:statistics-sig}
+]{Alloy/002_BBPv2.als}
+
+
+\subsection{Trip}
+\lstinputlisting[
+    firstline=45,
+    lastline=57,
+    caption={Trip signature},
+    label={lst:trip-sig}
+]{Alloy/002_BBPv2.als}
+A Trip is an object that has one single path, the statistics associated with the trip itself inserted by the user and the statistics retrieved from the external service. Because Trips are created by the user, it is necessary that every Trip has exactly one Path and that one RegisteredUser has registered said Trip.
+
+\subsection{RegisteredUser}
+\lstinputlisting[
+    firstline=59,
+    lastline=65,
+    caption={RegisteredUser signature},
+    label={lst:registereduser-sig}
+]{Alloy/002_BBPv2.als}

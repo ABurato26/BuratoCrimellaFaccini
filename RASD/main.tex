@@ -53,11 +53,11 @@
 \usepackage{amsfonts}
 \usepackage{bm}
 \usepackage[overload]{empheq} % For braced-style systems of equations.
-\usepackage{fix-cm} % To override original LaTeX restrictions on sizes
+\usepackage{fix-cm} 		% To override original LaTeX restrictions on sizes
 
 % PACKAGES FOR TABLES
 \usepackage{tabularx}
-\usepackage{longtable} % Tables that can span several pages
+\usepackage{longtable} 	% Tables that can span several pages
 \usepackage{colortbl}
 \usepackage{booktabs}
 
@@ -66,23 +66,34 @@
 \usepackage{algorithmic}
 
 % PACKAGES FOR REFERENCES & BIBLIOGRAPHY
-\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref} % Adds clickable links at references
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref} 				% Adds clickable links at references
 \usepackage{cleveref}
 \usepackage[square, numbers, sort&compress]{natbib} % Square brackets, citing references with numbers, citations sorted by appearance in the text and compressed
 \bibliographystyle{abbrvnat} % You may use a different style adapted to your field
 
 % OTHER PACKAGES
-\usepackage{pdfpages} % To include a pdf file
+\usepackage{pdfpages} 	% To include a pdf file
 \usepackage{afterpage}
-\usepackage{lipsum} % DUMMY PACKAGE
-\usepackage{fancyhdr} % For the headers
+\usepackage{lipsum} 		% DUMMY PACKAGE
+\usepackage{fancyhdr} 	% For the headers
 \fancyhf{}
 
-% Input of configuration file
-\input{Configuration_Files/config}
+% NEW INSERTIONS
+\usepackage{listings}	% Package to use external code snippets
+\lstset{					% Additional styling
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    	captionpos=b,
+}
+\input{Configuration_Files/config} % Input of configuration file
+\newcommand{\folder}{Chapters/}	% Custom command to add absolute path
 
-% Custom command to add absolute path
-\newcommand{\folder}{Chapters/}
+
+
+
+
 
 \begin{document}
 
