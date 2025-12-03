@@ -22,7 +22,7 @@ sig Segment{
 	nextSegment != this 
 
 	// if status is clear then its the only status possible
-	Clear in status implies #status = 1
+	and Clear in status implies #status = 1
 }
 
 sig Path{

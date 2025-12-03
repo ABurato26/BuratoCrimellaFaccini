@@ -18,7 +18,7 @@ An object Status is used to be associated with a street segment, therefore allow
     caption={Segment signature},
     label={lst:segment-sig}
 ]{Alloy/002_BBPv2.als}
-An object Segment is used to model street segments: every segment is connected to at most another segment (forming what actively is a chain of streets). To have consistent segments, they are to be considered as a part of a physical street and they also model direction of said street: therefore two different segments can be the same street segment but traversed in opposite direction, this implies that a necessary condition that we need to add is that a segment cannot connect to itself.
+An object Segment is used to model street segments: every segment is connected to at most another segment (forming what actively is a chain of streets). To have consistent segments, they are to be considered as a part of a physical street and they also model direction of said street: therefore two different segments can be the same street segment but traversed in opposite direction, this implies that a necessary condition that we need to add is that a segment cannot connect to itself. Finally, a segment has some status that can be of multiple nature (a segment can be simultaneously in RoadWork and have a Pothole to allow more precise scoring) or by default is Clear (meaning that when it's Clear, it is the only status that it can have).
 
 \subsection{Path}
 \lstinputlisting[
@@ -27,7 +27,7 @@ An object Segment is used to model street segments: every segment is connected t
     caption={Path signature},
     label={lst:path-sig}
 ]{Alloy/002_BBPv2.als}
-Following the definition of a Segment, a Path is simply an objects that keeps the first segment of an arbitrairly long chain of segments. Paths also have a score and, since paths are discovered and inserted by RegisteredUsers, it is necessary that a Trip (see Trip signature) has said Path associated to it.
+Following the definition of a Segment, a Path is simply an objects that references the first segment of an arbitrairly long chain of segments. Paths also have a score and, since paths are discovered and inserted by RegisteredUsers, it is necessary that a Trip (see Trip signature) has said Path associated to it.
 
 \subsection{Statistics}
 \lstinputlisting[
