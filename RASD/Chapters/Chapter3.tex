@@ -570,6 +570,7 @@ integrity of the collected data.
 
 \end{itemize}
 
+\newpage
 \section{Design Constraints}
 The design and development of the Best Bike Paths (BBP) system must adhere to specific boundaries imposed 
 by the operational environment, regulatory requirements, and the technological limitations of the end-user devices.
@@ -594,11 +595,37 @@ during long bike trips. Finally, the system is constrained by network connectivi
 retrieving meteorological information, publishing path data, and merging crowd-sourced information require an active internet connection. The system design must, 
 therefore, account for intermittent connectivity scenarios, typical of outdoor cycling routes, by implementing local caching mechanisms until a stable connection is re-established.
 
+\newpage
 \section{Software System Attributes}
-abc
+This section details the non-functional requirements that define the quality constraints of the Best Bike Paths system. These attributes are critical to ensuring the system 
+is not only functional but also trustworthy, accessible, and sustainable over time.
 
 \subsection{Reliability}
+Given the nature of real-time app data acquisition and community-driven content, the reliability of the system is fundamental. The system must ensure high accuracy in its Automated Mode, 
+specifically in the interpretation of sensor data to differentiate insignificant movements from truly obstacle.
+Furthermore, the data merging mechanism, which consolidates conflicting path statuses based on freshness, must be algorithmically robust. It must consistently produce a single, 
+logical status for a path without data corruption, even when multiple users submit updates simultaneously on the same path. Finally, the system must handle the failure of the external 
+API service gracefully, in general, the system must be fault tolerant to prevent the propagation of errors and to guarantee a continuous usability.
+
 \subsection{Availability}
+For the server-side components, the system generally targets a 99.9\% uptime during daylight hours to support routing requests. Downtime for maintenance should be scheduled during hours 
+of statistically low cycling activity to minimize disruption to the user base.
+A critical aspect of BBP is the tolerance regarding network connectivity, because if a biker is traveling a path with a poor or inexistent coverage the application must store the data 
+until the connection is restored.
+
 \subsection{Security}
+Security is focused on two main aspects: Data Privacy and Information Integrity.
+The privacy for the system is important because the tracking of user movements, origin-destination points, and cycling habits, this geolocation data. All these data are highly sensitive. 
+All personal data, particularly GPS logs, must be encrypted for safeness. Users' trip histories must be strictly accessible only to the account owner unless explicitly published.
+Instead, integrity must be ensured for data about path, score, obstacles and any other data useful for the usability of the system, they must be protected against malicious manipulation. 
+The system should implement authentication protocols to ensure that only registered users can modify path statuses.
+
 \subsection{Maintainability}
+The architecture must be modular to facilitate future updates, error correction and scalability. Specifically, the component responsible for interfacing with mobile hardware 
+(GPS, accelerometer, gyroscope) and the external meteorological service should be decoupled from the core business logic structure. This allows developers to update sensor calibration 
+or adopt new hardware APIs without rewriting the trip management logic or change provider for obtaining weather information.
+The database schema should also be designed to be extensible, allowing for the potential addition of new metrics to the trip statistics in future versions.
+
 \subsection{Portability}
+Portability is a functional necessity for the client-side application. The BBP mobile app must be compatible with the major mobile operating systems like Android and iOS to reach a sufficiently large community of bikers.
+Possible future addition could be the creation of website for only help user to visualize / planning trips, in that case the system will be cross-browser compatible, functioning correctly on all modern web browsers.
