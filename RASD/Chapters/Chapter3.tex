@@ -24,7 +24,7 @@
     \endlastfoot
 
     % --- DATA ---
-    R1 & The system shall allow new users to register an account \\ \hline
+        R1 & The system shall allow new users to register an account \\ \hline
         R2 & The system shall allow user not registered to access without an account if they don't want to register\\ \hline
         R3 & The system shall allow registered users to log in to the application \\ \hline
         R4 & The system shall allow registered users to view and update their personal profile information \\ \hline
@@ -68,7 +68,7 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.6]{UseCases.drawio.pdf}
+    \includegraphics[scale=0.5]{UseCases.drawio.pdf}
     \caption{Use Cases}
 \end{figure}
 
@@ -86,7 +86,7 @@ For each Use Case, the documentation follows a two-step structure:
 \end{itemize}
 
 %Use case 1
-\subsubsection*{UC1. Sign in to BBP}
+\subsubsection*{UC1. Sign up to BBP}
 
 %Table
 \begin{table}[htbp]
@@ -94,28 +94,31 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Unregistered User, BBP \\ \hline
+\textbf{Entry conditions} & The User is not already registered in BBP and has decided to sign up for the app \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User click to register the "Create Account" button
+    \item BBP show the registration form
+    \item User fills in the fields by entering his email address and password
+    \item BBP used the data to create a new account
+    \item If it's all correct the BBP show the app as registered user
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & BBP allows the User to access the application \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item The email address is not valid (Possible cases could be: email already link to another account or email does not exist), in this case BBP return the Sign Up form included a banner where it's shown "The email is not valid"
+    \item The password is not valid, in this case BBP return the Sign Up form included a banner where it's shown "The password is not valid"
+\end{enumerate} \\ \hline
 \end{tabularx}
-\caption{Sign in to BBP}
+\caption{Sign up to BBP}
 \end{table}
-
-\newpage
 
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
-    \caption{Sign in to BBP}
+    \includegraphics[scale=0.9]{Diagr_SignUp.drawio.pdf}
+    \caption{Sign up to BBP}
 \end{figure}
 
 \newpage
@@ -128,27 +131,29 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & User, BBP \\ \hline
+\textbf{Entry conditions} & The User is already registered in BBP and has decided to login \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User fill the Login form with email and password
+    \item BBP checks the credentials
+    \item If they are correct, BBP shows the app as registered user 
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & BBP allows the User to access the application \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item The email address is not valid, in this case BBP return the form included a banner where it's shown "The email is not valid"
+    \item The password is not valid, in this case BBP return the form included a banner where it's shown "The password is not valid"
+    \item The email is not registered to any account, in this case BBP return the form included a banner where it's shown "The email is not link to any account"
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Login to BBP}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.9]{Diagr_Login.drawio.pdf}
     \caption{Login to BBP}
 \end{figure}
 
@@ -162,27 +167,28 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP \\ \hline
+\textbf{Entry conditions} & User want to logout from the app \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item Registered User press the "Logout" button
+    \item BBP shows a banner asking if the User want to logout from his account
+    \item Registered User answers "Yes"
+    \item If it's all correct, BBP logs out the user and displays the application in guest mode
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & BBP shows the application as a guest user \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item Could be an internal error during the logout so if happens BBP shows a banner underline the error type and asking for the logout
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Logout to BBP}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.9]{Diagr_Logout.drawio.pdf}
     \caption{Logout to BBP}
 \end{figure}
 
@@ -230,27 +236,39 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP, Device, Weather API \\ \hline
+\textbf{Entry conditions} & The User has dediced to start a recording in automated mode \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User start a recording in automated mode
+    \item BBP shows a banner "Recording started"
+    \item First loop : every 2 seconds \begin{enumerate} 
+        \item BBP asks the device used for metrics
+        \item Device returns the data
+        \item BBP used these data to calculate and fill its fields
+    \end{enumerate}
+    \item Second loop : every 5 minutes \begin{enumerate} 
+        \item BBP asks the weather condition to API
+        \item API returns the data
+        \item BBP used these data to fill its fields
+    \end{enumerate} 
+    \item User press the button "End trip"
+    \item BBP shows a small summary of the activity
+    \item BBP save the trip in the personal storage area 
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & User has finished his trip \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item Device could produce an error after the request for metrics, if it's the case the metrics returned are empty and the BBP fill its fields with them
+    \item Weather API could produce an error and return nothing to BBP, if it's the case BBP will fill its fields with "Data not available"
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Recording with Automated Mode}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.49]{Diagr_AutomatedMode.drawio.pdf}
     \caption{Recording with Automated Mode}
 \end{figure}
 
@@ -279,12 +297,10 @@ For each Use Case, the documentation follows a two-step structure:
 \caption{Personal Trip Storage}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.85]{Diagr_TripStorage.drawio.pdf}
     \caption{Personal Trip Storage}
 \end{figure}
 
@@ -313,12 +329,10 @@ For each Use Case, the documentation follows a two-step structure:
 \caption{Search Path}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.9]{Diagr_Search.drawio.pdf}
     \caption{Search Path}
 \end{figure}
 
@@ -347,12 +361,10 @@ For each Use Case, the documentation follows a two-step structure:
 \caption{Look Publish Path}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.9]{Diagr_LookPublic.drawio.pdf}
     \caption{Look Publish Path}
 \end{figure}
 
@@ -397,112 +409,125 @@ For each Use Case, the documentation follows a two-step structure:
 %Goal 1
 \textbf{G1 : Recognize suitable bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R19:} The system shall recognise if the users are cycling on an exists bike path
+    \item \textbf{R20:} The system shall recognise if the users are cycling on a path where cars are rare and speed limits under 50kmh
+    \item \textbf{R28:} The system shall analyze sensor data to identify potential path irregularities
 \end{itemize}
 \vspace{1cm}
 
 %Goal 2
 \textbf{G2 : Allow the user to browse different bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R2:} The system shall allow user not registered to access without an account if they don't want to register
 \end{itemize}
 \vspace{1cm}
 
 %Goal 3
 \textbf{G3 : Allow the user to see bike paths statistics}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R8:} The system shall compute and display total distance covered for each trip
+    \item \textbf{R9:} The system shall compute and display average speed for each trip
+    \item \textbf{R10:} The system shall compute and display total time spent speed for each trip
+    \item \textbf{R11:} The system shall compute and display elevation gain for each trip
+    \item \textbf{R12:} The system shall compute and display calories spent for each trip
+    \item \textbf{R13:} The system shall compute and display additional performance metrics for the trips
+    \item \textbf{R21:} The system shall calculate the distance of a path
 \end{itemize}
 \vspace{1cm}
 
 %Goal 4
 \textbf{G4 : Allow the user to search for paths between two locations}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R33:} The system shall allow any user to search for bike paths by specifying an origin and a destination
+    \item \textbf{R34:} The system shall find for its data bike paths where an origin and a destination are specified by any users
+    \item \textbf{R35:} The system shall visualize the bike paths connecting the specified origin and destination on a map
 \end{itemize}
 \vspace{1cm}
 
 %Goal 5
 \textbf{G5 : Allow the user to see paths optimality based on other registered users' reviews}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R32:} The system shall prioritize data based on timeframe of execution and the number of confirmations to determine the current status
+    \item \textbf{R36:} The system shall compute a score for each path based on its status and its effectiveness in reaching the destination from the origin
+    \item \textbf{R37:} If multiple paths exist, from the user's request the system shall display them sorted by their calculated score
 \end{itemize}
 \vspace{1cm}
 
 %Goal 6
 \textbf{G6 : Allow user to see weather information when available}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R14:} The system shall retrieve meteorological data (weather conditions, temperature, wind speed) from an external service and enrich the trip data when available
 \end{itemize}
 \vspace{1cm}
 
 %Goal 7
 \textbf{G7 : Allow users to register to the application using credentials}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R1:} The system shall allow new users to register an account
+    \item \textbf{R3:} The system shall allow registered users to log in to the application
+    \item \textbf{R4:} The system shall allow registered users to view and update their personal profile information
+    \item \textbf{R5:} The system shall allow users to log out of their current session
 \end{itemize}
 \vspace{1cm}
 
 %Goal 8
 \textbf{G8 : Allow registered user to review published bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R31:} The system shall merge information about the same path from multiple users
+    \item \textbf{R32:} The system shall prioritize data based on timeframe of execution and the number of confirmations to determine the current status
 \end{itemize}
 \vspace{1cm}
 
 %Goal 9
 \textbf{G9 : Allow registered user to confirm or reject false positives in track recording}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R29:} The system shall require the user to confirm or correct the automatically acquired data
 \end{itemize}
 \vspace{1cm}
 
 %Goal 10
 \textbf{G10 : Allow registered user to let the system automatically record suitable bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R6:} The system shall allow registered users to record their cycling trips
+    \item \textbf{R25:} The system shall automatically infer that the registered user is cycling based on their speed
+    \item \textbf{R26:} The system shall collect GPS data to reconstruct the path followed by the user during the ride
+    \item \textbf{R27:} The system shall acquire data from the mobile device's accelerometer and gyroscope to detect basic metrics
+    \item \textbf{R28:} The system shall analyze sensor data to identify potential path irregularities
 \end{itemize}
 \vspace{1cm}
 
 %Goal 11
 \textbf{G11 : Allow registered user to manually create suitable bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R22:} The system shall allow registered users to manually insert bike path data by specifying the names of the streets included in the path
+    \item \textbf{R23:} The system shall allow registered users to manually specify the status of the street
+    \item \textbf{R24:} The system shall allow users to manually report the presence of obstacles on the street
 \end{itemize}
 \vspace{1cm}
 
 %Goal 12
 \textbf{G12 : Allow registered user to publish bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R16:} The system shall allow registered users to make publishable information about bike paths
+    \item \textbf{R30:} The system shall allow registered users to mark their inserted data as "publishable" to make it available to the community
 \end{itemize}
 \vspace{1cm}
 
 %Goal 13
 \textbf{G13 : Allow the store of bike paths data for registered users}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R6:} The system shall allow registered users to record their cycling trips
+    \item \textbf{R7:} The system shall store recorded trips to maintain a history of the user's cycling activities
+    \item \textbf{R31:} The system shall merge information about the same path from multiple users
 \end{itemize}
 \vspace{1cm}
 
 %Goal 14
 \textbf{G14 : Allow registered user to add publishable information about bike paths}
 \begin{itemize}
-    \item \textbf{R1:} abc
-    \item \textbf{R2:} abc
+    \item \textbf{R15:} The system shall allow registered users to insert information about bike paths
+    \item \textbf{R17:} The system shall allow registered users to add info about the status of a bike path
+    \item \textbf{R18:} The system shall allow registered users to add the presence of relevant obstacles on the bike path
 \end{itemize}
 
 %Mapping Table
@@ -516,43 +541,43 @@ For each Use Case, the documentation follows a two-step structure:
 \endhead
 
 % --- DATA ---
-R1 & $\checkmark$ & $\checkmark$ & & & & & & & & & & & & \\ \hline
-R2 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R3 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
-R4 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R5 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R6 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R7 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R8 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R1 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
+R2 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R3 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
+R4 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
+R5 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
+R6 & & & & & & & & & & $\checkmark$ & & & $\checkmark$ & \\ \hline
+R7 & & & & & & & & & & & & & $\checkmark$ & \\ \hline
+R8 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
 R9 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R10 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R11 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R10 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R11 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
 R12 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R13 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R14 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R15 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R16 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R17 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R18 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R13 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R14 & & & & & & $\checkmark$ & & & & & & & & \\ \hline
+R15 & & & & & & & & & & & & & & $\checkmark$ \\ \hline
+R16 & & & & & & & & & & & & $\checkmark$ & & \\ \hline
+R17 & & & & & & & & & & & & & & $\checkmark$ \\ \hline
+R18 & & & & & & & & & & & & & & $\checkmark$ \\ \hline
 R19 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
 R20 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
 R21 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R22 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R23 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R24 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R25 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R26 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R27 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R28 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R29 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R30 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R31 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R32 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R33 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R34 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R35 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
-R36 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
-R37 & $\checkmark$ & & & & & & & & & & & & & \\ \hline
+R22 & & & & & & & & & & & $\checkmark$ & & & \\ \hline
+R23 & & & & & & & & & & & $\checkmark$ & & & \\ \hline
+R24 & & & & & & & & & & & $\checkmark$ & & & \\ \hline
+R25 & & & & & & & & & & $\checkmark$ & & & & \\ \hline
+R26 & & & & & & & & & & $\checkmark$ & & & & \\ \hline
+R27 & & & & & & & & & & $\checkmark$ & & & & \\ \hline
+R28 & $\checkmark$ & & & & & & & & & $\checkmark$ & & & & \\ \hline
+R29 & & & & & & & & & $\checkmark$ & & & & & \\ \hline
+R30 & & & & & & & & & & & & $\checkmark$ & & \\ \hline
+R31 & & & & & & & & $\checkmark$ & & & & & $\checkmark$ & \\ \hline
+R32 & & & & & $\checkmark$ & & & $\checkmark$ & & & & & & \\ \hline
+R33 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
+R34 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
+R35 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
+R36 & & & & & $\checkmark$ & & & & & & & & & \\ \hline
+R37 & & & & & $\checkmark$ & & & & & & & & & \\ \hline
 \caption{Mapping Requirements on Goals}
 \end{longtable}
 
