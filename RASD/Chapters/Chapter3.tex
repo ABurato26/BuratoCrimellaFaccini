@@ -61,21 +61,41 @@
         R35 & The system shall visualize the bike paths connecting the specified origin and destination on a map \\ \hline
         R36 & The system shall compute a score for each path based on its status and its effectiveness in reaching the destination from the origin \\ \hline
         R37 & If multiple paths exist, from the user's request the system shall display them sorted by their calculated score \\ \hline
+        R38 & The system shall collect paths data and keep it saved \\ \hline
+        R39 & The system shall visualize paths data \\ \hline
+        R40 & The system shall filter paths through various attributes \\ \hline
+        R41 & The system shall allow the user to search through public paths \\ \hline
+        R42 & The system shall be able to comunicate with a weather API \\ \hline
+        R43 & The system shall be able to comunicate with an API for finding cycling routes \\ \hline
+        R44 & The system shall be able to comunicate with an API for calculate the distance between 2 coordinates \\ \hline
+        R45 & The system shall allow registered users to manually insert the duration of the trip \\ \hline
+        R46 & The system shall distinguish between declared public trip and private ones \\ \hline
+        R47 & The system shall allow registered users to visualize a summary of the trip  \\ \hline
 \end{longtable}
 
-\vspace{2cm}
+\newpage
 \subsection{Use Cases Diagrams}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{UseCases.drawio.pdf}
+    \includegraphics[scale=0.7]{Diagr_UseCases.drawio.pdf}
     \caption{Use Cases}
 \end{figure}
 
+\newpage
+\subsubsection{Use Case Diagram Description}
+The provided Use Case diagrams illustrate the functional requirements and actor interactions within the Best Bike Paths (BBP) system. The diagrams are structured to differentiate between the levels of access granted to users:
+\begin{itemize}
+    \item Authentication and Access: The initial view depicts the generic Client actor, representing an unauthenticated user who interacts with the system's entry points to Sign Up, Log In, or proceed as a Guest
+    \item Guest Functionality: The Guest actor is afforded limited privileges, primarily focused on information retrieval. Their interactions utilize the Bike Path API to "Search Path" and "Look Public Path," allowing users to visualize routes without contributing new data
+    \item Registered User Functionality: The detailed main diagram focuses on the Registered User, who has access to the full suite of BBP features, including "Trip Storage" and "Trip Recording." A key component is the "Trip Recording" use case, which supports two distinct data ingestion methods:
+        \begin{itemize}
+            \item Manual Mode: Allows the user to input street names and status directly
+            \item Automated Mode: Integrates with secondary actors—specifically the Device (accelerometers/gyroscopes) and the Weather API—to automatically compute basic statistics, retrieve meteorological data, and detect potential obstacles or status updates during a ride
+        \end{itemize}
+\end{itemize}
 
-%Qui devi metterci delle scritte per spiegare un minimo i grafici
-%----
-\vspace{2cm}
+\vspace{5cm}
 
 \subsection{Use Cases}
 In this section, they are explained and represented the main identified use cases.  
@@ -282,17 +302,26 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP \\ \hline
+\textbf{Entry conditions} & User want to view his completed and saved trips \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User clicks the section about personal trip storage
+    \item BBP shows the trips saved and taken by the User
+    \item User selects a specific trip (currently private) to view its report and make it public
+    \item BBP returns a screen with the trip report
+    \item User clicks the button to make the trip public
+    \item If it's all right, BBP updates the page with the now public trip and adds it to the public search for data merge
+    \item User selects another trip (currently public) to view its report and make it private
+    \item BBP returns a screen with the trip report
+    \item User clicks the button to make the trip private
+    \item If it's all right, BBP updates the page with the now private trip and delete it to the public search for data merge
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & User has finished to view his past trips \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item During the change from private to public and vice versa, an internal problem may occur. In this case, BBP returns a banner with the error type and reloads the trips page without any changes having occurred
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Personal Trip Storage}
 \end{table}
@@ -314,17 +343,21 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP \\ \hline
+\textbf{Entry conditions} & User want to search a path from a certain starting point to an ending point \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User requests a path search through 2 selected points
+    \item BBP shows a banner with the search loading
+    \item BBP find all paths that pass through those 2 points
+    \item If it's all right, BBP returns the paths found
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & User can consult the search results to see the most suitable path \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item If the start or end points do not exist, BBP returns a banner with the words "Points not valid" and reloads the empty search page ready for new data entry
+    \item If no paths exist, BBP returns a banner with the words "No paths found" and reloads the empty search page ready for new data entry
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Search Path}
 \end{table}
@@ -346,17 +379,23 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP \\ \hline
+\textbf{Entry conditions} & User wants to see the trips published by other users \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User requests to view the routes published in his area
+    \item BBP search between the pubblic paths
+    \item If it's all right, BBP returns the results
+    \item User selects a path
+    \item BBP return the path's summary
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & User has finished to visualize other public paths \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item During the selection of a path, an internal problem may occur. In this case, BBP returns a banner with the error type and reloads the public path page
+    \item If the area does not exist, BBP returns a banner with the words "Area not valid" and loads the empty search page ready for new data entry
+    \item If no public path exist, BBP returns a banner with the words "No public path found" and loads the empty search page ready for new data entry
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Look Publish Path}
 \end{table}
@@ -370,7 +409,7 @@ For each Use Case, the documentation follows a two-step structure:
 
 \newpage
 %Use case 9
-\subsubsection*{UC9. Account Settings}
+\subsubsection*{UC9. Obstacle detection}
 
 %Table
 \begin{table}[htbp]
@@ -390,7 +429,7 @@ For each Use Case, the documentation follows a two-step structure:
     \item abc
 \end{itemize} \\ \hline
 \end{tabularx}
-\caption{Account Settings}
+\caption{Obstacle detection}
 \end{table}
 
 \newpage
@@ -399,7 +438,7 @@ For each Use Case, the documentation follows a two-step structure:
 \begin{figure}[htbp]
     \centering
     \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
-    \caption{Account Settings}
+    \caption{Obstacle detection}
 \end{figure}
 
 \newpage
@@ -418,7 +457,9 @@ For each Use Case, the documentation follows a two-step structure:
 %Goal 2
 \textbf{G2 : Allow the user to browse different bike paths}
 \begin{itemize}
-    \item \textbf{R2:} The system shall allow user not registered to access without an account if they don't want to register
+    \item \textbf{R39:} The system shall visualize paths data
+    \item \textbf{R40:} The system shall filter paths through various attributes
+    \item \textbf{R41:} The system shall allow the user to search through public paths
 \end{itemize}
 \vspace{1cm}
 
@@ -432,6 +473,8 @@ For each Use Case, the documentation follows a two-step structure:
     \item \textbf{R12:} The system shall compute and display calories spent for each trip
     \item \textbf{R13:} The system shall compute and display additional performance metrics for the trips
     \item \textbf{R21:} The system shall calculate the distance of a path
+    \item \textbf{R44:} The system shall be able to comunicate with an API for calculate the distance between 2 coordinates
+    \item \textbf{R47:} The system shall allow registered users to visualize a summary of the trip
 \end{itemize}
 \vspace{1cm}
 
@@ -441,6 +484,7 @@ For each Use Case, the documentation follows a two-step structure:
     \item \textbf{R33:} The system shall allow any user to search for bike paths by specifying an origin and a destination
     \item \textbf{R34:} The system shall find for its data bike paths where an origin and a destination are specified by any users
     \item \textbf{R35:} The system shall visualize the bike paths connecting the specified origin and destination on a map
+    \item \textbf{R43:} The system shall be able to comunicate with an API for finding cycling routes
 \end{itemize}
 \vspace{1cm}
 
@@ -457,6 +501,7 @@ For each Use Case, the documentation follows a two-step structure:
 \textbf{G6 : Allow user to see weather information when available}
 \begin{itemize}
     \item \textbf{R14:} The system shall retrieve meteorological data (weather conditions, temperature, wind speed) from an external service and enrich the trip data when available
+    \item \textbf{R42:} The system shall be able to comunicate with a weather API
 \end{itemize}
 \vspace{1cm}
 
@@ -464,6 +509,7 @@ For each Use Case, the documentation follows a two-step structure:
 \textbf{G7 : Allow users to register to the application using credentials}
 \begin{itemize}
     \item \textbf{R1:} The system shall allow new users to register an account
+    \item \textbf{R2:} The system shall allow user not registered to access without an account if they don't want to register
     \item \textbf{R3:} The system shall allow registered users to log in to the application
     \item \textbf{R4:} The system shall allow registered users to view and update their personal profile information
     \item \textbf{R5:} The system shall allow users to log out of their current session
@@ -502,6 +548,7 @@ For each Use Case, the documentation follows a two-step structure:
     \item \textbf{R22:} The system shall allow registered users to manually insert bike path data by specifying the names of the streets included in the path
     \item \textbf{R23:} The system shall allow registered users to manually specify the status of the street
     \item \textbf{R24:} The system shall allow users to manually report the presence of obstacles on the street
+    \item \textbf{R45:} The system shall allow registered users to manually insert the duration of the trip
 \end{itemize}
 \vspace{1cm}
 
@@ -510,6 +557,7 @@ For each Use Case, the documentation follows a two-step structure:
 \begin{itemize}
     \item \textbf{R16:} The system shall allow registered users to make publishable information about bike paths
     \item \textbf{R30:} The system shall allow registered users to mark their inserted data as "publishable" to make it available to the community
+    \item \textbf{R46:} The system shall distinguish between declared public trip and private ones
 \end{itemize}
 \vspace{1cm}
 
@@ -519,6 +567,7 @@ For each Use Case, the documentation follows a two-step structure:
     \item \textbf{R6:} The system shall allow registered users to record their cycling trips
     \item \textbf{R7:} The system shall store recorded trips to maintain a history of the user's cycling activities
     \item \textbf{R31:} The system shall merge information about the same path from multiple users
+    \item \textbf{R38:} The system shall collect paths data and keep it saved
 \end{itemize}
 \vspace{1cm}
 
@@ -542,7 +591,7 @@ For each Use Case, the documentation follows a two-step structure:
 
 % --- DATA ---
 R1 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
-R2 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R2 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
 R3 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
 R4 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
 R5 & & & & & & & $\checkmark$ & & & & & & & \\ \hline
@@ -578,6 +627,16 @@ R34 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
 R35 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
 R36 & & & & & $\checkmark$ & & & & & & & & & \\ \hline
 R37 & & & & & $\checkmark$ & & & & & & & & & \\ \hline
+R38 & & & & & & & & & & & & & $\checkmark$ & \\ \hline
+R39 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R40 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R41 & & $\checkmark$ & & & & & & & & & & & & \\ \hline
+R42& & & & & & $\checkmark$ & & & & & & & & \\ \hline
+R43 & & & & $\checkmark$ & & & & & & & & & & \\ \hline
+R44 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
+R45 & & & & & & & & & & & $\checkmark$ & & & \\ \hline
+R46 & & & & & & & & & & & & $\checkmark$ & $\checkmark$ & \\ \hline
+R47 & & & $\checkmark$ & & & & & & & & & & & \\ \hline
 \caption{Mapping Requirements on Goals}
 \end{longtable}
 
@@ -588,7 +647,7 @@ integrity of the collected data.
 
 \begin{itemize}
     \item \textbf{Response Time and Latency:}  The system must ensure low latency during critical user interactions to maintain usability. Specifically, for general browsing and viewing of bike paths, the system should render map visualizations and path details within 3 seconds of a user's request, assuming a standard 4G/5G connection. For the route-finding feature, the algorithm computing the path score and optimal route must complete execution within 5 seconds. Regarding the "Automated mode," the system is required to process sensor inputs (accelerometer and gyroscope) and GPS data in real-time. The lag between the physical detection of an obstacle and its internal logging on the device should be very reduced to ensure accurate timestamping and location tagging. However, the complex merging of data from the same path can be performed asynchronously on the server side, provided that the updated status becomes available to the community within a reasonable timeframe like 5 minutes of data upload
-    \item \textbf{Number of Concurrent Users:} As a community-driven platform managed by a biker's association, BBP must support a significant number of concurrent users, particularly during periods where the numbers of bikers could increase a lot, such as weekends and holidays. The system backend must be capable of handling at least 1,000 concurrent active sessions without performance degradation
+    \item \textbf{Number of Concurrent Users:} As a community-driven platform managed by a biker's association, BBP must support a significant number of concurrent users, particularly during periods where the numbers of bikers could increase a lot, such as weekends and holidays. The system backend must be capable of handling at least 1 mln concurrent active sessions without performance degradation
     \item \textbf{Data Storage and Capacity:} The storage infrastructure must be designed to accommodate high-volume geospatial and time-series data. Since the application records continuous GPS tracks, along with high-frequency accelerometer and gyroscope readings for obstacle detection, the database will grow rapidly. The system requires a scalable storage solution capable of archiving historical trip data while keeping active path inventories and recent statistics immediately accessible. Provisioning should be made for storing several Terabytes of data over the first few years of operation, with a strategy for data retention that prioritizes the freshness of path conditions
     \item \textbf{Network Bandwidth and Connectivity:} The system must be resilient to variable network conditions. The application should optimize data transmission to minimize bandwidth usage, which is crucial for users with limited data plans. In "Automated mode," the system must implement a "store-and-forward" mechanism: if the user enters an area with poor or no connectivity, the application must locally buffer all GPS and sensor data. Once connectivity is restored, the system should upload the accumulated data without freezing the user interface or interrupting the ongoing recording of the trip. The transmission of external meteorological data should be lightweight, fetching updates only at necessary intervals rather than continuously streaming, to preserve bandwidth
     \item \textbf{Energy Efficiency:} A critical performance requirement for the system's component is battery consumption. The simultaneous usage of the GPS module, accelerometer, gyroscope, and background processing algorithms constitutes a high energy drain. The application must be optimized to ensure that running the "Automated mode" doesn't reduce a standard smartphone battery excessively fast. The optimal target should be to allow a user to track a continuous ride of at least 5 to 8 hours on a fully charged device
@@ -609,7 +668,7 @@ and associate trips with registered profiles, adherence to EU's GDPR (General Da
 Moreover, the system relies on external services. Therefore, it must comply with standard geospatial data formats to ensuring interoperability 
 with standard mapping APIs and the navigation modules. The communication between the mobile application, the backend server, and the external 
 meteorological service must adhere to modern security standards, necessitating the use of HTTPS and TLS protocols to encrypt data in transit. 
-Finally, the integration of weather data implies compliance with the specific API standards provided by the chosen third-party meteorological service provider.
+Finally, the integration of weather data implies compliance with the specific API standards provided by the chosen third-party meteorological service provider, like OpenWeatherMap.
 
 \subsection{Hardware limitations}
 The "Automated mode" of the BBP application introduces significant hardware dependencies that act as constraints on the system's 
@@ -653,4 +712,3 @@ The database schema should also be designed to be extensible, allowing for the p
 
 \subsection{Portability}
 Portability is a functional necessity for the client-side application. The BBP mobile app must be compatible with the major mobile operating systems like Android and iOS to reach a sufficiently large community of bikers.
-Possible future addition could be the creation of website for only help user to visualize / planning trips, in that case the system will be cross-browser compatible, functioning correctly on all modern web browsers.
