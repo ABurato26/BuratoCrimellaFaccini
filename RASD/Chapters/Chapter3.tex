@@ -222,27 +222,49 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP, External APIs \\ \hline
+\textbf{Entry conditions} & User has dediced to start a recording in manual mode \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User start a recording in manual mode
+    \item BBP shows a banner "Recording started"
+    \item BBP shows a page where user have to insert the starting point of his trip
+    \item User insert the coordinates of his starting point
+    \item If it's all right, BBP shows a confirmation banner
+    \item First loop : every node that user pass \begin{enumerate} 
+        \item User insert the coordinates of his next node
+        \item Optional : User insert the obstacles on the road
+        \item Optional : User insert the road status
+        \item BBP shows a confirmation banner
+        \item BBP create a segment with the last two nodes
+    \end{enumerate}
+    \item User press the button "End trip"
+    \item BBP shows an ending banner
+    \item User insert the starting and finishing time
+    \item Second loop : every segment created \begin{enumerate} 
+        \item BBP asks the distance of a segment to API
+        \item API returns the distance
+        \item BBP used these data to fill its fields
+    \end{enumerate} 
+    \item BBP calculate the metrics
+    \item BBP shows a small summary of the activity
+    \item BBP save the trip in the personal storage area 
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & User has finished his trip \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item If the node it's not valid BBP shows an error banner and reload the insertion page
+    \item If accur an API error BBP skip that segment and process the next one
+    \item If starting time is greater than finishing time BBP shows the error and reload the insertion time page
+\end{enumerate} \\ \hline
 \end{tabularx}
 \caption{Recording with Manual Mode}
 \end{table}
 
-\newpage
-
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
+    \includegraphics[scale=0.6]{Diagr_ManualMode.drawio.pdf}
     \caption{Recording with Manual Mode}
 \end{figure}
 
@@ -257,7 +279,7 @@ For each Use Case, the documentation follows a two-step structure:
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
 \textbf{Actor} & Registered User, BBP, Device, Weather API \\ \hline
-\textbf{Entry conditions} & The User has dediced to start a recording in automated mode \\ \hline
+\textbf{Entry conditions} & User has dediced to start a recording in automated mode \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
 \begin{enumerate}[nosep, leftmargin=*] 
     \item User start a recording in automated mode
@@ -409,7 +431,7 @@ For each Use Case, the documentation follows a two-step structure:
 
 \newpage
 %Use case 9
-\subsubsection*{UC9. Obstacle detection}
+\subsubsection*{UC9. Obstacles detection}
 
 %Table
 \begin{table}[htbp]
@@ -417,28 +439,42 @@ For each Use Case, the documentation follows a two-step structure:
 \renewcommand{\arraystretch}{1.4} 
 \begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
 \hline
-\textbf{Actor} & abc \\ \hline
-\textbf{Entry conditions} & abc \\ \hline
+\textbf{Actor} & Registered User, BBP, Device \\ \hline
+\textbf{Entry conditions} & During a trip recording in Automated Mode BBP detected an obstacle \\ \hline
 \textbf{Event Flow} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*] 
-    \item abc
-\end{itemize} \\ \hline
-\textbf{Exit condition} & abc \\ \hline
+\begin{enumerate}[nosep, leftmargin=*] 
+    \item User start a recording in automated mode
+    \item BBP shows a banner "Recording started"
+    \item First loop : every 2 seconds \begin{enumerate} 
+        \item BBP asks the device used for metrics
+        \item Device returns the data
+        \item BBP used these data to calculate and fill its fields
+        \item BBP analyze the data
+        \item Optional : BBP detects an obstacle and save this information
+    \end{enumerate}
+    \item User press the button "End trip"
+    \item Second loop : every obstacle detected \begin{enumerate} 
+        \item BBP shows a form about the presence of obstacle in a specific point
+        \item User answers Yes or No
+        \item BBP used this data to update the obstacles presence
+    \end{enumerate}
+    \item BBP shows a small summary of the activity
+    \item BBP save the trip in the personal storage area 
+\end{enumerate} \\ \hline
+\textbf{Exit condition} & Trip is over \\ \hline
 \textbf{Exceptions} & \vspace{0pt}
-\begin{itemize}[nosep, leftmargin=*]
-    \item abc
-\end{itemize} \\ \hline
+\begin{enumerate}[nosep, leftmargin=*]
+    \item Device could produce an error after the request for metrics, if it's the case the metrics returned are empty and the BBP fill its fields with them
+\end{enumerate} \\ \hline
 \end{tabularx}
-\caption{Obstacle detection}
+\caption{Obstacles detection}
 \end{table}
-
-\newpage
 
 %Diagram
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.5]{raggiera_polimi-eps-converted-to.pdf}
-    \caption{Obstacle detection}
+    \includegraphics[scale=0.75]{Diagr_ObstaclesDetection.drawio.pdf}
+    \caption{Obstacles detection}
 \end{figure}
 
 \newpage
