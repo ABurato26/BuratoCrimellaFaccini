@@ -7,63 +7,203 @@
 /** For modelling purposes, segments are different even if not (imagine a
 	map-like interaction with common nodes **/
 
-// status of the roads (expandible)
-abstract sig Status{}				
+/**** Variable stuff ****
+Segment: 			status
+Path: 				score
+Trip: 				path, averageSpeed, duration, externalStats
+RegisteredUser:	registeredTrips, publishedTrips **/
+
+/*** SIGNATURES ***/
+abstract sig Status{}
 one sig Clear extends Status{}
 one sig RoadWork extends Status{}
 one sig Pothole extends Status{}
 
 sig Segment{
 	nextSegment: lone Segment,
-	status: some Status
-}{
-	// a segment cannot point to itself as next 
-	// (but cycles are allowed)
-	nextSegment != this 
-
-	// if status is clear then its the only status possible
-	and Clear in status implies #status = 1
+	var status: some Status
 }
 
 sig Path{
 	start: Segment,
-	score: Int
-}{
-	// Paths are saved only if associated with 
-	// at least a Trip
-	some t: Trip| t.path = this
+	var score: Int
 }
 
-sig Statistics{}{
-	// Statistics are saved only if associated 
-	// with at least a trip
-	some t: Trip| t.averageSpeed = this 
-	or t.duration = this 
-	or t.externalStats = this
-}					
+sig Statistics{}
 
 sig Trip{
-	path: one Path,
-	averageSpeed: one Statistics,
-	duration: one Statistics,
-	externalStats: lone Statistics
-}{
-	// statistics are different
-	averageSpeed != duration and duration != externalStats
-
-	// Trips are saved only if associated with 
-	// at least a registered user
-	one u: RegisteredUser| this in u.registeredTrips
+	var path: lone Path,
+	var averageSpeed: lone Statistics,
+	var duration: lone Statistics,
+	var externalStats: lone Statistics
 }
 
 sig RegisteredUser {
-	registeredTrips: set Trip,
-	publishedTrips: set Trip
+	var registeredTrips: set Trip,
+	var publishedTrips: set Trip
 }{
 	// published trips are a subset of all registered trips
 	publishedTrips in registeredTrips 
 }
 
+abstract sig ManualInsertionState{
+	next: lone ManualInsertionState
+}
+one sig StartTripCreation extends ManualInsertionState{}
+one sig FirstSegmentCreation extends ManualInsertionState{}
+one sig SegmentInsertion extends ManualInsertionState{}
+one sig ComputeScore extends ManualInsertionState{}
+one sig InsertDuration extends ManualInsertionState{}
+one sig ComputeStatistics extends ManualInsertionState{}
+one sig PublicPrivate extends ManualInsertionState{}
+
+one sig CurrentState{
+	var state: one ManualInsertionState
+}{
+	state' in state + state.next
+}
+
+/*** FACTS ***/
+
+/**
+fact default{
+	all s: Segment| s.nextSegment' = s.nextSegment and
+		s.status' = s.status
+
+	and all t: Trip |( 
+		t.(path + averageSpeed + duration + externalStats)' = 
+		t.(path + averageSpeed + duration + externalStats))
+	
+	and all p: Path| p.start' = p.start and
+		p.score' = p.score
+
+	and all ru: RegisteredUser|
+		ru.(registeredTrips + publishedTrips)' = 
+		ru.(registeredTrips + publishedTrips)
+
+	and all s: Segment| (s.nextSegment' != s)
+
+	and all s: Segment| ((Clear in s.status') implies #s.status' = 1)
+}
+**/
+
+fact alwaysValid{
+	// Paths are saved only if associated with 
+	// at least a Trip
+	all p: Path|(
+		some t: Trip| t.path = p)
+
+	and 
+	// Statistics are saved only if associated 
+	// with at least a trip
+	all s: Statistics|(
+		some t: Trip| t.averageSpeed = s 
+		or t.duration = s 
+		or t.externalStats = s)
+
+	and
+	// statistics are different in trips
+	all t: Trip|(
+		t.averageSpeed != t.duration and t.duration != t.externalStats)
+		/**
+		// Trips are saved only if associated with 
+		// at least a registered user
+		and one u: RegisteredUser| t in u.registeredTrips
+		**/
+}
+
+fact insertionOrder{
+	StartTripCreation.next = FirstSegmentCreation
+	FirstSegmentCreation.next = SegmentInsertion
+	SegmentInsertion.next = ComputeScore
+	ComputeScore.next = InsertDuration
+	InsertDuration.next = ComputeStatistics
+	ComputeStatistics.next = PublicPrivate
+	PublicPrivate.next = PublicPrivate
+}
+
+/*** PREDICATES ***/
+pred updateOnlyUser[u: RegisteredUser]{
+	// state is not changed by the predicate itself
+	CurrentState.state' in CurrentState.state + CurrentState.state.next
+
+	// Start trip creation
+	(CurrentState.state = StartTripCreation) implies(
+		// only the added trip changes
+		one t: Trip, p: Path|( 
+			// new trip is added
+			u.registeredTrips' = u.registeredTrips + t 
+			and t not in u.registeredTrips
+			and t.path' = p 
+			and p.start = none
+			and t.averageSpeed' = none
+			and t.duration' = none
+			and t.externalStats' = none
+			and all tr: Trip - t|(
+				tr.(path + averageSpeed + duration + externalStats)' = 
+				tr.(path + averageSpeed + duration + externalStats)
+			)
+		)
+		and
+		all s: Segment| (s.nextSegment' = s.nextSegment and
+			s.status' = s.status)
+	
+		and all p: Path| (p.start' = p.start and
+			p.score' = p.score)
+
+		and all ru: RegisteredUser - u|(
+			ru.(registeredTrips + publishedTrips)' = 
+			ru.(registeredTrips + publishedTrips))
+
+		and all s: Segment| (s.nextSegment' != s)
+
+		and all s: Segment| ((Clear in s.status') implies #s.status' = 1)
+	)
+	(CurrentState.state = FirstSegmentCreation) implies (
+		one s: Segment|(
+			// new segment is added
+			some t: Trip| some p: Path| t.path' = p and p.start' = s
+		)
+		
+	)
+/**
+	(CurrentState.state = SegmentInsertion) implies ()
+	(CurrentState.state = ComputeScore) implies ()
+	(CurrentState.state = InsertDuration) implies ()
+	(CurrentState.state = ComputeStatistics) implies ()
+	(CurrentState.state = PublicPrivate) implies ()
+	**/	
+}
+
+pred manualInsertionExample{
+	// start
+	once CurrentState.state = StartTripCreation
+	
+	one u: RegisteredUser| updateOnlyUser[u]
+	// user inserts new trip into registered trips
+	after(CurrentState.state = FirstSegmentCreation)
+	
+	// now continues to insert segments in path
+	after after(CurrentState.state = SegmentInsertion)
+
+/**		after after after(CurrentState.state = SegmentInsertion)
+		after after after after(CurrentState.state = SegmentInsertion)
+	
+		// after insertion computes path score
+		after after after after after(CurrentState.state = ComputeScore)
+	
+		// then user inserts duration
+		after after after after after after(CurrentState.state = InsertDuration)
+	
+		// then system inserts every statistic
+		after after after after after after after(CurrentState.state = ComputeStatistics)
+		
+		// lastly, user chooses to make public or private
+		after after after after after after after after(CurrentState.state = PublicPrivate)
+	// end
+	eventually CurrentState.state = PublicPrivate
+**/
+}
 /**** UTILITY FUNCTIONS and PREDICATES ****/
 
 // show the segments of a path:
@@ -100,11 +240,11 @@ fact pathsFacts{
 }
 
 
-/** When building a path, it is mandatory that streets are well connected
-	(such as NodeB of the i street is connected to NodeA of the i+1 
-	street) **/
+run manualInsertionExample for 3 steps 
 
-run {} for 50 but 
+/**for 50 but 
+		exactly 2 RegisteredUser,
 		exactly 10 Trip,
-		exactly 7 Path,
+		exactly 5 Path,
 		exactly 30 Segment
+**/
