@@ -22,10 +22,26 @@ Since no other conflicting data has been entered recently, BBP immediately consi
 \textbf{Scenario 4: Scenario 4: Analyzing Performance and Weather}\\
 Diana has just finished a long weekend ride. She opens BBP to review her activity history. The system presents a list of her stored trips. She selects the most recent one to view the details. BBP displays her total distance covered, average speed, and other performance metrics. Additionally, since the system successfully retrieved data from the external meteorological service during her ride, the trip log is enriched with weather information, showing that she maintained a high average speed despite strong headwinds and low temperatures.
 \subsection{Class diagram}
-testtesttest
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Images/class_diagram.pdf}
+    \caption{Class diagram representing the main entities and their relationships in the BBP system.}
+    \label{fig:class_diagram}
+\end{figure}
+
+
 \subsection{State diagrams}
 
-\textbf{Trip Recording Lifecycle}
+\textbf{Login and Registration}
+This diagram depicts the user authentication flow. The application defaults to Guest Mode, which allows limited access to map visualization and routing. To perform active tasks like trip recording or data reporting, the user must enter an \texttt{Authenticated Session}. The model details the transitions for logging in, signing up, and handling session termination.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{"state_diagrams/login.pdf"}
+    \caption{State diagram of the trip recording process.}
+    \label{fig:trip_state_diagram}
+\end{figure}
+
+\textbf{Automated trip recording}
 The state diagram depicts the trip lifecycle, originating in the \texttt{MonitoringSpeed} state where the system samples GPS data. The transition to \texttt{Recording} occurs either manually or automatically when a speed threshold is exceeded, actively collecting sensor data in \texttt{AcquiringData} or temporarily shifting to \texttt{Paused} when stationary. The process concludes in \texttt{AwaitingAction}, where the user reviews statistics and confirms anomalies before the trip is finally \texttt{Saved} or \texttt{Discarded}.
 \begin{figure}[H]
     \centering
@@ -34,8 +50,26 @@ The state diagram depicts the trip lifecycle, originating in the \texttt{Monitor
     \label{fig:trip_state_diagram}
 \end{figure}
 
+\textbf{Manual trip recording}
+This diagram models the workflow for manually logging a trip after it has been completed (``offline reporting''). Since no real-time GPS tracking is involved, the user first provides general metadata (Origin, Destination, Duration). Subsequently, the user reconstructs the route by inputting the sequence of streets traversed. The system then allows the user to annotate specific segments with details such as potholes or road status before finalizing the submission.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{"state_diagrams/manual.pdf"}
+    \caption{State diagram of the manual trip registration process.}
+    \label{fig:manual_registration_state_diagram}
+\end{figure}
 
+\textbf{Path data aggregation}
+This diagram illustrates the backend logic for updating path attributes when new user data is submitted. The system first matches the recorded GPS trace against existing road segments in the database. It then compares the new report with historical data. If the new data confirms the existing status, the confidence score is boosted. If a conflict arises (e.g., a user reports a pothole on a previously ``Optimal'' path), the system applies a weighting algorithm based on data freshness to resolve the discrepancy and update the public score.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{"state_diagrams/matching.pdf"}
+    \caption{State diagram of the path data aggregation process.}
+    \label{fig:path_data_aggregation_state_diagram}
+\end{figure}
 
+\textbf{Anomaly Detection and Validation}
+This diagram illustrates the lifecycle of a road anomaly (e.g., a pothole) from detection to publication. Since sensor data can generate false positives, the system implements a validation step. Potential anomalies are first flagged internally as ``Candidates'' and presented to the user at the end of the trip for confirmation before being stored as valid data.
 
 
 

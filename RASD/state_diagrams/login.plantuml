@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+
+[*] --> GuestMode
+GuestMode : Passive Access\n(Search & View Map)
+
+GuestMode --> EnteringCredentials : User taps\nLogin
+GuestMode --> Registering : User taps\nSign Up
+
+state EnteringCredentials {
+  EnteringCredentials : User inputs\nemail & password
+}
+
+EnteringCredentials --> Authenticating : Submit Data
+Authenticating : Validating credentials\nwith Server
+
+Authenticating --> EnteringCredentials : Login Failed\n(Wrong Password)
+Authenticating --> AuthenticatedSession : Login Success
+
+Registering : Input personal details\n& Privacy Consent
+Registering --> AuthenticatedSession : Registration\nComplete
+
+state AuthenticatedSession {
+  AuthenticatedSession : Full Access\n(Tracking, Reporting,\nHistory Management)
+}
+
+AuthenticatedSession --> GuestMode : User Logouts
+AuthenticatedSession --> GuestMode : Session Expired\n(Timeout)
+
+@enduml
