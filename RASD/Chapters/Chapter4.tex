@@ -143,19 +143,85 @@ Here we list the main rules for a path to be coherent: segment exist only if con
 ]{Alloy/002_BBPGeneral.als}
 Since different paths can be generated even when segments in them are the same in the same order, a function computes the sequence of segments of a path and a fact ensures that no two equal paths exist (so that trips can point to the same equal path without having duplicates).
 
-\section{Model Graph}
+\section{Static Model Graph}
+\subsection{Graphs and proof of consistency}
 \lstinputlisting[
     firstline=153,
     lastline=157,
-    caption={Run iteration},
-    label={lst:runCommand}
+    caption={First Run iteration},
+    label={lst:firstRunCommand}
+]{Alloy/002_BBPGeneral.als}
+\lstinputlisting[
+    firstline=159,
+    lastline=163,
+    caption={Second Run iteration},
+    label={lst:secondRunCommand}
 ]{Alloy/002_BBPGeneral.als}
 After all the signatures and facts we can run an example of an iteration and comment the results.
-From the figure below, we can see that by forcing the program to have less paths than trips Alloy gives us a consistent predicate by generating trips (in this case Trip3 and Trip0) that connect to the same path (which is exactly what we wanted in reality, since users can record different trips on the same path). Also, we notice that segments of different paths can point to the same next segment, which is allowed to optimize space and to not have multiple segments that model the same street.
+From the figure below, we can see that by forcing the program to have less paths than trips Alloy gives us a consistent predicate by generating trips (in first run Trip3 and Trip0 for example) that connect to the same path (which is exactly what we wanted in reality, since users can record different trips on the same path). Also, we notice that segments of different paths can point to the same next segment, which is allowed to optimize space and to not have multiple segments that model the same street. It is also possible that every user has no published trips (see second run).
+Below, the proof of consistency of the two run is also shown.
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale=0.9]{alloy_General.pdf}
-    \caption{}
+    \includegraphics[width=\textwidth]{alloy_General.pdf}
+    \caption{First Run result}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_General2.pdf}
+	\caption{Second Run result}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_General_Consistency.pdf}
+	\caption{Proof of consistency}
 \end{figure}
 
+\FloatBarrier
 \section{Merging of two paths}
+Since one of the goals of the application is the merging of paths that represent identical roads by updating their information based on an algorithm that judges their freshness, we decided to show how our model behaves in the instant of the merge. Our basic assumption is that, since Alloy doesn't permit deletions of entities once they're created, the merging of two paths is considered done when at least one of the two Path objects points to the starting Segment of the other  Path object: what will be obtained is two paths that point to the same starting Segment, the remaining floating chain of segments (that for us will represent the "old" path, with outdated informations) is to be considered detached from the model.
+
+\subsection{Vars in signatures}
+\lstinputlisting[
+    firstline=21,
+    lastline=24,
+    caption={New Path signature},
+    label={lst:newPathSig}
+]{Alloy/004_BBPMerging.als}
+To make the model mutable, we changed the Trip signature to make path a variable relation, in this way it will be possible to modify the path of a trip when the merging occurs.
+
+\subsection{Merge predicate}
+\lstinputlisting[
+    firstline=100,
+    lastline=117,
+    caption={Merge predicate},
+    label={lst:mergePredicate}
+]{Alloy/004_BBPMerging.als}
+In this predicate, we define the condition on which is possible to have a merge (paths must be of equal length) and how the merge is done: the new path of the newest trip is kept as it is, whereas the path of an old trip is changed to match the new one, disconnecting the old path from the entirety of the model (and not only for that specific trip) so that all trips connected to the old Path will connect to the new one.
+
+\subsection{Example predicate}
+\lstinputlisting[
+    firstline=121,
+    lastline=142,
+    caption={Merging example},
+    label={lst:mergingExample}
+]{Alloy/004_BBPMerging.als}
+By using a predicate to structure an example of merge, we defined a feasible situation where we can test the merge predicate (included at line 19). From the pictures below it is possible to notice how Trip1 loses the reference to Path1, acquiring the new Path0.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging.pdf}
+	\caption{First instant of iteration}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging2.pdf}
+	\caption{Second instant of iteration}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging_Consistency.png}
+	\caption{Second instant of iteration}
+\end{figure}

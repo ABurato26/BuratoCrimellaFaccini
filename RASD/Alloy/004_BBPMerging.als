@@ -57,6 +57,16 @@ fact startsAreHeads {
 	)
 }
 
+fact uniqueTrips{
+	all u1,u2: RegisteredUser|(
+		all t: Trip|(
+			u1 != u2 and
+			(t in u1.registeredTrips) implies
+			(t not in u2.registeredTrips)
+		)
+	)
+}
+
 fact coherentPaths{
 	// Segments are saved only if associated with another 
 	// segment or a Path (and at least an object Path 
@@ -93,7 +103,8 @@ pred merge[u1: RegisteredUser, u2: RegisteredUser - u1]{
        	p2 in u2.registeredTrips.path and
        	#(p1.start.^nextSegment) = #(p2.start.^nextSegment)
 
-		// from now, p2 is the fresher path so p1 needs to be disconnected
+		// from now, p2 is the fresher path so p1 needs to 
+		// be disconnected
  		// trips formerly on p1 now point to p2
        	and all t: Trip | (
     		((t.path = p1) implies (t.path' = p2))
