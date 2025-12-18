@@ -150,8 +150,14 @@ fact pathEquality{
 			showPath[p1] != showPath[p2])
 }
 
-run example{} for 50 but 
-		exactly 3 RegisteredUser,
-		exactly 4 Trip,
-		exactly 3 Path,
-		exactly 6 Segment
+run example{} for 20 but 
+	exactly 3 RegisteredUser,
+	exactly 4 Trip,
+	exactly 3 Path,
+	exactly 6 Segment
+
+run example{} for 20 but
+	exactly 5 RegisteredUser,
+	exactly 6 Trip,
+	exactly 1 Path,
+	exactly 3 Segment

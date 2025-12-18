@@ -15,6 +15,7 @@
 \usepackage{emptypage} % To insert empty pages
 \usepackage{multicol} % To write in multiple columns (executive summary)
 \usepackage{enumitem} % For bulleted lists
+\usepackage{placeins} % For placing all images before a section
 \setlength\columnsep{15pt} % Column separation in executive summary
 \setlength\parindent{0pt} % Indentation
 \raggedbottom  
@@ -86,8 +87,10 @@
 \lstset{					% Additional styling
 	keywordstyle=\color{red}\bfseries,
 	keywordstyle=[2]\color{blue}\bfseries,
-	morekeywords={sig, fact, this},
+	keywordstyle=[3]\color{purple}\bfseries,
+	morekeywords={sig, fact, this, run, example},
 	morekeywords=[2]{abstract, extends, one, some, lone, all, in, and, or, set},
+    morekeywords=[3]{var},
     basicstyle=\ttfamily\small,
     numbers=left,
     numberstyle=\tiny,
