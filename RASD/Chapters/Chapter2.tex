@@ -123,15 +123,12 @@ We identify two main categories of users:
 \section{Assumptions, dependencies and constraints}
 
 \subsection{Domain assumptions}
-testtesttest
-
-
-%COMMENTI PER GLI USE CASES
-
-%s Scenario 1 -> Use Case: "Search for bike path".
-
-%Scenario 2 -> Use Case: "Automated data acquisition" & "Validate anomaly".
-
-%Scenario 3 -> Use Case: "Insert path information (Manual)".
-
-%Scenario 4 -> Use Case: "View trip history".
+\begin{itemize}
+    \item \textbf{GPS Accuracy:} It is assumed that the GPS sensors on users' mobile devices provide a level of accuracy sufficient to identify specific street segments, typically within a range of 5--10 meters.
+    \item \textbf{Internet Connectivity:} Users are assumed to have access to a stable internet connection (WiFi or mobile data) at the end of their trips to allow the synchronization of recorded data with the BBP servers.
+    \item \textbf{Map Service Reliability:} External map providers (e.g., Google Maps, OpenStreetMap) are assumed to provide up-to-date and accurate information regarding road networks, street names, and cycling-compatible paths.
+    \item \textbf{User Honesty and Reliability:} It is assumed that registered users provide truthful information when manually inserting path status or confirming automated detections of obstacles like potholes.
+    \item \textbf{Availability of External APIs:} External services for meteorological data and geocoding are assumed to be operational and reachable via standard protocols when the system needs to enrich trip data.
+    \item \textbf{Device Sensor Functionality:} For automated data acquisition, it is assumed that the users' smartphones are equipped with functioning accelerometers and gyroscopes capable of detecting significant movement anomalies.
+    \item \textbf{Path Decomposition:} Every bike path can be logically represented as a continuous sequence of segments, where each segment corresponds to a physical portion of the road network.
+\end{itemize}
