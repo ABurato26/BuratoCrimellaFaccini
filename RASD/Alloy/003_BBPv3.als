@@ -1,18 +1,4 @@
 /**** Best Bike Paths model for alloy specification ****/
-
-/** For readability and simplicity motivations we decided to not completely
-	use every possible object of the model (Nodes are modeled without 
-	coordinates data and so equality is by object, not value).**/
-
-/** For modelling purposes, segments are different even if not (imagine a
-	map-like interaction with common nodes **/
-
-/**** Variable stuff ****
-Segment: 			status
-Path: 				score, start
-Trip: 				path, averageSpeed, duration, externalStats
-RegisteredUser:	registeredTrips, publishedTrips **/
-
 /*** SIGNATURES ***/
 open util/ordering[World]
 abstract sig Status{}
@@ -64,6 +50,15 @@ fact MultipleWorlds{
 	some World
 }
 
+fact WorldSequence{
+	// first ever state is first of the FSM
+	first.state = StartTripCreation
+
+	// transitions are always in FSM order
+	all w: World - last|
+		w.next.state = w.state or w.next.state = w.state.next
+}
+
 /*** FACTS ***/
 fact pathsLinkedToTrips{
 	all w: World|(
@@ -105,29 +100,55 @@ fact insertionOrder{
 
 /*** PREDICATES ***/
 pred startTripTransition {
-	all w: World - last |
-    	let w2 = w.next | (
-      		(w.state = StartTripCreation) implies (
-        	some u: RegisteredUser, t: Trip, p: Path |
-          	// u gains trip t in the next world (and t wasn't present in u's trips in w)
-          	t in w2.registeredTrips[u] and not (t in w.registeredTrips[u])
-          	// t gets its path set to p in w2
-          	and (t->p) in w2.pathOf and not ((t->p) in w.pathOf)
-          	// t's statistics are empty in the next world
-          	and no w2.avgSpeedOf[t] and no w2.durationOf[t] and no w2.externalStatsOf[t]
-          	// Everything else remains unchanged across worlds except the intended changes:
-          	and all otherUser: RegisteredUser - u |
-             	w2.registeredTrips[otherUser] = w.registeredTrips[otherUser]
-          	// trips other than t keep the same path mapping
-          	and all tp: Trip - t |
-             	w.pathOf[tp] = w2.pathOf[tp]
-          	// path/segment structure unchanged
-          	and all pth: Path | w2.startOf[pth] = w.startOf[pth]
-      	)
+	all w: World - last |(
+      	(w.state = StartTripCreation) implies (
+        	some u: RegisteredUser, t: Trip, p: Path |(
+         		// u gains trip t in the next world 
+          		t in w.next.registeredTrips[u] 
+				
+				// t wasn't present in u's trips in w
+				and not (t in w.registeredTrips[u])
+          		
+				// t gets its path set to p in w.next
+         		and (t->p) in w.next.pathOf and not ((t->p) in w.pathOf)
+
+          		// t's statistics are empty in the next world
+          		and no w.next.avgSpeedOf[t] 
+				and no w.next.durationOf[t] 
+				and no w.next.externalStatsOf[t]
+		
+          		// Everything else remains unchanged
+          		and all otherUser: RegisteredUser - u |(
+            		w.next.registeredTrips[otherUser] = 
+					w.registeredTrips[otherUser]
+					and w.next.publishedTrips[otherUser] =
+					w.publishedTrips[otherUser]
+				)
+
+          		// trips other than t keep the same path mapping
+          		and all tp: Trip - t |(
+            		w.pathOf[tp] = w.next.pathOf[tp]
+				)
+
+          		// path/segment structure unchanged
+          		and all pth: Path | (
+					w.next.startOf[pth] = w.startOf[pth]
+				)
+			)
+		)
+		
+		and (w.state = FirstSegmentCreation) implies(
+			some u: RegisteredUser, p: Path|(
+				one s: Segment|(
+					s in w.next.startOf[p] 
+					and p in w.next.pathOf[w.next.publishedTrips[u]]
+				)
+				
+				//and all otherUser: RegisteredUser - u|(	
+			)
+		)
     )
 }
-
-
 
 fact segmentsFacts{
 
@@ -169,14 +190,20 @@ fact equalPaths{
 }
 
 pred manualInsertionExample {
-  // require there is at least one world pair to exercise a step
-  some w: World | w.next != none
-  // force that first transition satisfy the startTripTransition properties
-  startTripTransition
+  	// require there is at least one world pair to exercise a step
+  	some w: World | w.next != none
+  	// force that first transition satisfy the startTripTransition properties
+  	startTripTransition
 }
 
-run manualInsertionExample for 3 World, 4 RegisteredUser, 6 Trip, 4 Path, 8 Segment, 3 Statistics, 5 Int
-
+run manualInsertionExample for 
+	5 World, 
+	exactly 1 RegisteredUser, 
+	exactly 2 Trip, 
+	1 Path, 
+	8 Segment, 
+	3 Statistics, 
+	5 Int
 
 /**for 50 but 
 		exactly 2 RegisteredUser,
