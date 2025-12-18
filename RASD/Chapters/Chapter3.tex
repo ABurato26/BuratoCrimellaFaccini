@@ -1,4 +1,120 @@
+\section{External Interface Requirements}
+\subsection{User Interfaces}
+The Best Bike Paths (BBP) system is delivered as a mobile application to ensure high-speed data acquisition from device sensors and to provide portability. The following subsections illustrate the interface design through mockups, categorized by access mode.
 
+\subsubsection{Guest Mode}
+The Guest Mode allows users to explore the network of bike paths without the need for an account.
+
+% 1. Home Mappa
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=1, width=0.28\textwidth]{mockup.pdf}
+    \caption{Guest Mode: Home screen with map view showing available bike paths.}
+    \label{fig:guest_home_map}
+\end{figure}
+
+% 2. Percorso evidenziato
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=2, width=0.28\textwidth]{mockup.pdf}
+    \caption{Guest Mode: Map view with a selected path highlighting specific characteristics and scores.}
+    \label{fig:guest_path_detail}
+\end{figure}
+
+% 3. Visualizzazione lista
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=3, width=0.28\textwidth]{mockup.pdf}
+    \caption{Guest Mode: List view of available bike paths filtered by proximity or rating.}
+    \label{fig:guest_list_view}
+\end{figure}
+
+% 4. Login e Registrazione
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=4, width=0.28\textwidth]{mockup.pdf}
+    \caption{Authentication screen: Login and Sign-up forms.}
+    \label{fig:auth_screen}
+\end{figure}
+
+\subsubsection{Logged User Mode}
+Once authenticated, the user can access personal features and contribute to data collection.
+
+% 5. Mappa utente loggato
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=5, width=0.28\textwidth]{mockup.pdf}
+    \caption{Logged User Mode: Main map interface for registered users.}
+    \label{fig:logged_home}
+\end{figure}
+
+% 6. Profilo e viaggi
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=6, width=0.28\textwidth]{mockup.pdf}
+    \caption{Profile Screen: User account details and history of recorded trips.}
+    \label{fig:user_profile}
+\end{figure}
+
+% 7. Aggiunta manuale
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=7, width=0.28\textwidth]{mockup.pdf}
+    \caption{Manual Input: Interface for manually adding a new bike path or segment.}
+    \label{fig:manual_addition}
+\end{figure}
+
+% 8. Lista path app
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=8, width=0.28\textwidth]{mockup.pdf}
+    \caption{Community Paths: Comprehensive list of all paths registered in the system.}
+    \label{fig:path_list_complete}
+\end{figure}
+
+% 9. Notifiche rilevamento
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=9, width=0.28\textwidth]{mockup.pdf}
+    \caption{System Notification: Automated detection of cycling activity via sensors.}
+    \label{fig:notification_detection}
+\end{figure}
+
+% 10. Conferma rilevamento
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=10, width=0.28\textwidth]{mockup.pdf}
+    \caption{Detection Confirmation: Screen to validate the automatically recorded trip.}
+    \label{fig:confirmation_screen}
+\end{figure}
+
+% 11. Dettagli path
+\begin{figure}[H]
+    \centering
+    \includegraphics[page=11, width=0.28\textwidth]{mockup.pdf}
+    \caption{Path Details: Comprehensive data and statistics for a specific bike route.}
+    \label{fig:path_details_logged}
+\end{figure}
+\subsection{Hardware Interfaces}
+The application requires a direct interface with the mobile device's hardware to satisfy the automated tracking and detection goals.
+\begin{itemize}
+    \item \textbf{Geospatial Sensors}: The system interfaces with the GPS module to transmit position data for path reconstruction.
+    \item \textbf{Inertial Measurement Units (IMU)}: Direct access to the accelerometer and gyroscope is required to detect movement anomalies and identify road irregularities like potholes.
+    \item \textbf{Display and Input}: Standard capacitive touchscreen and high-resolution display for map rendering and user input.
+\end{itemize}
+\subsection{Software Interfaces}
+The BBP system relies on several external APIs and services to function as a centralized resource.
+\begin{itemize}
+    \item \textbf{External Location Service}: Used for geocoding and distance calculations between coordinates.
+    \item \textbf{Meteorological API}: The system connects to external weather services to retrieve current conditions (temperature, wind speed) for specific locations and times.
+    \item \textbf{Mapping Providers}: Integration with services like OpenStreetMap or Google Maps for up-to-date road information and base-map rendering
+\end{itemize}
+\subsection{Communication Interfaces}
+To ensure the integrity and synchronization of the crowd-sourced data, the following communication standards are used:
+\begin{itemize}
+    \item \textbf{Secure Protocols}: All data exchange between the mobile client and the backend server is performed via HTTPS/TLS protocols to protect sensitive geolocation data.
+    \item \textbf{Store-and-Forward Mechanism}: The communication interface manages a local buffer to store GPS and sensor data during connectivity drops, ensuring synchronization occurs once a stable internet connection is restored.
+\end{itemize}
 \section{Functional Requirements}
 \subsection{Requirements}
 
