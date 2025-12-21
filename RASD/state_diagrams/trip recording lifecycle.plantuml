@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+
+[*] --> MonitoringSpeed
+MonitoringSpeed : SamplingGPS,\nComputingSpeed, \nValidatingActivity
+
+MonitoringSpeed --> MonitoringSpeed : Speed < Threshold
+
+MonitoringSpeed --> Recording : User presses Start\n(Manual)
+MonitoringSpeed --> Recording : Speed > Threshold\n(Automated)
+
+state Recording {
+  [*] --> AcquiringData
+  AcquiringData : Collect GPS,\nAccelerometer,\nGyroscope 
+  
+  AcquiringData --> Paused : Speed is 0\nfor T seconds
+  Paused --> AcquiringData : Movement\nresumed
+}
+
+Recording --> AwaitingAction : Trip Ended
+Recording --> AwaitingAction : User Stops
+
+  AwaitingAction : Display statistics
+  AwaitingAction : Request anomaly\nconfirmation 
+
+AwaitingAction --> Discarded : User\nDiscards
+AwaitingAction --> Saved : User\nSaves
+
+Saved --> [*]
+Discarded --> [*]
+@enduml

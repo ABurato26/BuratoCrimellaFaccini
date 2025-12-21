@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+
+[*] --> Dashboard
+Dashboard : Registered user\nviewing Home
+
+Dashboard --> InputBasicInfo : User taps\nAdd path
+
+state InputBasicInfo {
+  InputBasicInfo : Enter Origin & Destination\nEnter Total Duration\nSelect Date
+}
+
+InputBasicInfo --> ReconstructingPath : Next Step
+
+state ReconstructingPath {
+  ReconstructingPath : Search & Add Streets\nto build route sequence
+}
+
+ReconstructingPath --> ReconstructingPath : Add next street
+
+ReconstructingPath --> AnnotatingSegments : Path Complete
+
+state AnnotatingSegments {
+  AnnotatingSegments : Select a street from list\nAdd specific anomaly\n(e.g., Pothole)
+}
+
+AnnotatingSegments --> AnnotatingSegments : Add another report
+
+AnnotatingSegments --> Saving : Submit Trip
+ReconstructingPath --> Saving : Submit Trip\n(No anomalies to report)
+
+state Saving {
+  Saving : Validate Topology\nUpdate User History
+}
+
+Saving --> [*]
+@enduml

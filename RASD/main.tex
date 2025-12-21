@@ -1,5 +1,5 @@
 % This template is freely taken by the MSc thesis template from School of
-%Industrial and Information Engineering at Politecnico di Milano.
+% Industrial and Information Engineering at Politecnico di Milano.
 % Source: https://www.ingindinf.polimi.it/en/students/lessons-and-exams/
 % bachelors-and-masters-degree-exams/thesis-format-templates
 
@@ -14,6 +14,8 @@
 \usepackage{setspace} % For using single or double spacing
 \usepackage{emptypage} % To insert empty pages
 \usepackage{multicol} % To write in multiple columns (executive summary)
+\usepackage{enumitem} % For bulleted lists
+\usepackage{placeins} % For placing all images before a section
 \setlength\columnsep{15pt} % Column separation in executive summary
 \setlength\parindent{0pt} % Indentation
 \raggedbottom  
@@ -52,35 +54,57 @@
 \usepackage{amsfonts}
 \usepackage{bm}
 \usepackage[overload]{empheq} % For braced-style systems of equations.
-\usepackage{fix-cm} % To override original LaTeX restrictions on sizes
+\usepackage{fix-cm} 		% To override original LaTeX restrictions on sizes
 
 % PACKAGES FOR TABLES
 \usepackage{tabularx}
-\usepackage{longtable} % Tables that can span several pages
+\usepackage{longtable} 	% Tables that can span several pages
 \usepackage{colortbl}
+\usepackage{booktabs}
 
 % PACKAGES FOR ALGORITHMS (PSEUDO-CODE)
 \usepackage{algorithm}
 \usepackage{algorithmic}
 
 % PACKAGES FOR REFERENCES & BIBLIOGRAPHY
-\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref} % Adds clickable links at references
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref} 				% Adds clickable links at references
 \usepackage{cleveref}
 \usepackage[square, numbers, sort&compress]{natbib} % Square brackets, citing references with numbers, citations sorted by appearance in the text and compressed
 \bibliographystyle{abbrvnat} % You may use a different style adapted to your field
 
 % OTHER PACKAGES
-\usepackage{pdfpages} % To include a pdf file
+\usepackage{pdfpages} 	% To include a pdf file
 \usepackage{afterpage}
 \usepackage{lipsum} % DUMMY PACKAGE
 \usepackage{fancyhdr} % For the headers
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{amssymb}
 \fancyhf{}
 
-% Input of configuration file. Do not change config.tex file unless you really know what you are doing. 
-\input{Configuration_Files/config}
+% NEW INSERTIONS
+\usepackage{listings}	% Package to use external code snippets
+\lstset{					% Additional styling
+	keywordstyle=\color{red}\bfseries,
+	keywordstyle=[2]\color{blue}\bfseries,
+	keywordstyle=[3]\color{purple}\bfseries,
+	morekeywords={sig, fact, this, run, example},
+	morekeywords=[2]{abstract, extends, one, some, lone, all, in, and, or, set},
+    morekeywords=[3]{var},
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    	captionpos=b,
+    	tabsize=4
+}
+\input{Configuration_Files/config} % Input of configuration file
+\newcommand{\folder}{Chapters/}	% Custom command to add absolute path
 
-% Custom command to add absolute path
-\newcommand{\folder}{Chapters/}
+
+
+
+
 
 \begin{document}
 
@@ -90,20 +114,14 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}}
 
-%----------------------------------------------------------------------------
-%	TITLE PAGE
-%----------------------------------------------------------------------------
-
+%--- Start of title page
 \pagestyle{empty} % No page numbers
-\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the preamble pages
+\frontmatter % Roman page numbering style 
 
 \puttitle{
-    title={RASD -- Requirement Analysis and Verification Document}, % Title of the project
+    title={Best Bike Paths -- RASD Document}, % Title of the project
     name={Alessandro Burato, Gabriele Crimella, Davide Faccini}, % Student names
-    course={Software Engineering 2 }, % Course / context
-    ID=,  % Student ID number (numero di matricola) - leave blank if not applicable
     advisor={Elisabetta Di Nitto}, % Supervisor name
-    coadvisor={}, % No co-supervisor
     academicyear={2025-26},  % Academic Year
 } % These info will be put into your Title page 
 

@@ -1,1 +1,227 @@
-Chapter 4
+For readability and simplicity reasons, we decided to divide the alloy analysis in two parts:  in the first one we will explain how we intended to model our application in a more detailed way, showing all the relations that keep coherent our model, in the second one we will show the verification of the merging of two paths using temporal operators. As a design choice, we chose to insert the most important objects of the model simplifying the complex ones (for example, individual nodes of streets are not modeled) and we kept what we thought was essential to comprehend the entirety of the model.
+
+\section{Signatures}
+
+\subsection{Status}
+\lstinputlisting[
+    firstline=13,
+    lastline=16,
+    caption={Status signature},
+    label={lst:status-sig}
+]{Alloy/002_BBPGeneral.als}
+An object Status is used to be associated with a street segment, therefore allowing us to better describe streets and to introduce potholes. The actual signature is abstract since we wanted to make the object expandable with more variants (we added Clear, RoadWork and Pothole as examples).
+
+\subsection{Segment}
+\lstinputlisting[
+    firstline=18,
+    lastline=21,
+    caption={Segment signature},
+    label={lst:segment-sig}
+]{Alloy/002_BBPGeneral.als}
+An object Segment is used to model street segments: every segment is connected to at most another segment (forming what actively is a chain of streets). To have consistent segments, they are to be considered as a part of a physical street and they also model direction of said street: therefore two different segments can be the same street segment but traversed in opposite direction, this implies that a necessary condition that we need to add is that a segment cannot connect to itself. Finally, a segment has some status that can be of multiple nature (a segment can be simultaneously in RoadWork and have a Pothole to allow more precise scoring) or by default is Clear (meaning that when it's Clear, it is the only status that it can have).
+
+\subsection{Path}
+\lstinputlisting[
+    firstline=23,
+    lastline=26,
+    caption={Path signature},
+    label={lst:path-sig}
+]{Alloy/002_BBPGeneral.als}
+Following the definition of a Segment, a Path is simply an objects that references the first segment of an arbitrairly long chain of segments. Paths also have a score and, since paths are discovered and inserted by RegisteredUsers, it is necessary that a Trip (see Trip signature) has said Path associated to it.
+
+\subsection{Statistics}
+\lstinputlisting[
+    firstline=28,
+    lastline=28,
+    caption={Statistics signature},
+    label={lst:statistics-sig}
+]{Alloy/002_BBPGeneral.als}
+Statistics are present only to enrich the graphical appearance of our model and are possessed by every Trip.
+
+\subsection{Trip}
+\lstinputlisting[
+    firstline=30,
+    lastline=33,
+    caption={Trip signature},
+    label={lst:trip-sig}
+]{Alloy/002_BBPGeneral.als}
+A Trip is an object that has one single path and the statistics associated with the trip itself inserted by the user and retrieved from the external service. Because Trips are created by the user, it is necessary that every Trip has exactly one Path and that one RegisteredUser has registered said Trip.
+
+\subsection{RegisteredUser}
+\lstinputlisting[
+    firstline=35,
+    lastline=38,
+    caption={RegisteredUser signature},
+    label={lst:registereduser-sig}
+]{Alloy/002_BBPGeneral.als}
+A RegisteredUser models a user with ability to record trips. We decided not to model Guests in Alloy because the functionalities we wanted to test are used only by users with an account, so the users that we used have published trips and registered trips, where the published trips are naturally a subset of the registered ones.
+
+
+\section{Facts}
+All the following facts ensure us that the model stays coherent and that objects are created following a correct hierarchy.
+
+\subsection{Paths linked to Trips}
+\lstinputlisting[
+    firstline=41,
+    lastline=47,
+    caption={Paths linked to Trips},
+    label={lst:PathsLinked-fact}
+]{Alloy/002_BBPGeneral.als}
+In order for a Path to exist, there must be a Trip that connects to it: this is used to avoid having paths that exist by themselves.
+
+\subsection{Statistics linked to Trips}
+\lstinputlisting[
+    firstline=50,
+    lastline=62,
+    caption={Statistics linked to Trips},
+    label={lst:statisticsFact-fact}
+]{Alloy/002_BBPGeneral.als}
+Like before, in order for a Statistics to exist it is mandatory that a Trip connects to it; also, in order to make the model prettier, it is forced that every statistic is different from the rest (so that every Trip has a different Statistics object).
+
+\subsection{Trips linked to Users}
+\lstinputlisting[
+    firstline=65,
+    lastline=71,
+    caption={User has at least one Trip},
+    label={lst:userHasTrips-fact}
+]{Alloy/002_BBPGeneral.als}
+Again, in order for a Trip to exist it must be saved by a RegisteredUser.
+
+
+\subsection{User has at least one Trip}
+\lstinputlisting[
+    firstline=74,
+    lastline=78,
+    caption={User has at least one Trip},
+    label={lst:userHasTrips-fact}
+]{Alloy/002_BBPGeneral.als}
+Like before, RegisteredUser objects that don't have trips are useless in our model, so we make sure that every user has at least one.
+
+\subsection{Published Trips are subset to Regisetered ones}
+\lstinputlisting[
+    firstline=81,
+    lastline=85,
+    caption={Published trips are subset to Registered ones},
+    label={lst:publishedSubsetOfRegistered-fact}
+]{Alloy/002_BBPGeneral.als}
+Since one of the goals of the application is to allow users to save their trips and RegisteredUsers are allowed to also publish them, it is important to enforce that publishedTrips are in fact a subset of registeredTrips (since a registeredTrip can be published or can stay private).
+
+\subsection{Start segments don't have backlinks}
+\lstinputlisting[
+    firstline=88,
+    lastline=95,
+    caption={Start segments don't have backlinks},
+    label={lst:startSegment-fact}
+]{Alloy/002_BBPGeneral.als}
+This fact ensures that there's no segment that is both in a path and comes before the start of the path itself.
+
+\subsection{Trips are personal}
+\lstinputlisting[
+    firstline=98,
+    lastline=106,
+    caption={Trips are personal},
+    label={lst:personalTrips-fact}
+]{Alloy/002_BBPGeneral.als}
+Since trips contain statistics that are relevant for each user, each Trip is unique to each user.
+
+
+\subsection{Path coherence}
+\lstinputlisting[
+    firstline=109,
+    lastline=137,
+    caption={Path coherence},
+    label={lst:pathCoherence-fact}
+]{Alloy/002_BBPGeneral.als}
+Here we list the main rules for a path to be coherent: segment exist only if connected by another one (or a Path), if a Path connects with at least one of the same chain and loops are avoided.
+
+\subsection{Path equality}
+\lstinputlisting[
+    firstline=139,
+    lastline=151,
+    caption={Path equality},
+    label={lst:pathEquality-fact}
+]{Alloy/002_BBPGeneral.als}
+Since different paths can be generated even when segments in them are the same in the same order, a function computes the sequence of segments of a path and a fact ensures that no two equal paths exist (so that trips can point to the same equal path without having duplicates).
+
+\section{Static Model Graph}
+\subsection{Graphs and proof of consistency}
+\lstinputlisting[
+    firstline=153,
+    lastline=157,
+    caption={First Run iteration},
+    label={lst:firstRunCommand}
+]{Alloy/002_BBPGeneral.als}
+\lstinputlisting[
+    firstline=159,
+    lastline=163,
+    caption={Second Run iteration},
+    label={lst:secondRunCommand}
+]{Alloy/002_BBPGeneral.als}
+After all the signatures and facts we can run an example of an iteration and comment the results.
+From the figure below, we can see that by forcing the program to have less paths than trips Alloy gives us a consistent predicate by generating trips (in first run Trip3 and Trip0 for example) that connect to the same path (which is exactly what we wanted in reality, since users can record different trips on the same path). Also, we notice that segments of different paths can point to the same next segment, which is allowed to optimize space and to not have multiple segments that model the same street. It is also possible that every user has no published trips (see second run).
+Below, the proof of consistency of the two run is also shown.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{alloy_General.pdf}
+    \caption{First Run result}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_General2.pdf}
+	\caption{Second Run result}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_General_Consistency.pdf}
+	\caption{Proof of consistency}
+\end{figure}
+
+\FloatBarrier
+\section{Merging of two paths}
+Since one of the goals of the application is the merging of paths that represent identical roads by updating their information based on an algorithm that judges their freshness, we decided to show how our model behaves in the instant of the merge. Our basic assumption is that, since Alloy doesn't permit deletions of entities once they're created, the merging of two paths is considered done when at least one of the two Path objects points to the starting Segment of the other  Path object: what will be obtained is two paths that point to the same starting Segment, the remaining floating chain of segments (that for us will represent the "old" path, with outdated informations) is to be considered detached from the model.
+
+\subsection{Vars in signatures}
+\lstinputlisting[
+    firstline=21,
+    lastline=24,
+    caption={New Path signature},
+    label={lst:newPathSig}
+]{Alloy/004_BBPMerging.als}
+To make the model mutable, we changed the Trip signature to make path a variable relation, in this way it will be possible to modify the path of a trip when the merging occurs.
+
+\subsection{Merge predicate}
+\lstinputlisting[
+    firstline=100,
+    lastline=117,
+    caption={Merge predicate},
+    label={lst:mergePredicate}
+]{Alloy/004_BBPMerging.als}
+In this predicate, we define the condition on which is possible to have a merge (paths must be of equal length) and how the merge is done: the new path of the newest trip is kept as it is, whereas the path of an old trip is changed to match the new one, disconnecting the old path from the entirety of the model (and not only for that specific trip) so that all trips connected to the old Path will connect to the new one.
+
+\subsection{Example predicate}
+\lstinputlisting[
+    firstline=121,
+    lastline=142,
+    caption={Merging example},
+    label={lst:mergingExample}
+]{Alloy/004_BBPMerging.als}
+By using a predicate to structure an example of merge, we defined a feasible situation where we can test the merge predicate (included at line 19). From the pictures below it is possible to notice how Trip1 loses the reference to Path1, acquiring the new Path0.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging.pdf}
+	\caption{First instant of iteration}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging2.pdf}
+	\caption{Second instant of iteration}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{alloy_Merging_Consistency.png}
+	\caption{Second instant of iteration}
+\end{figure}

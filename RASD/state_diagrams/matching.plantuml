@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+
+[*] --> ReceivingData
+ReceivingData : Validate Uploaded Trip\nParse GPS Segments
+
+ReceivingData --> MatchingStreets : Data Validated
+
+state MatchingStreets {
+  MatchingStreets : Align GPS trace\nto Map Database
+}
+
+MatchingStreets --> CreatingNewEntry : Street not found\nin DB
+MatchingStreets --> AnalyzingConflict : Street exists\nin DB
+
+state AnalyzingConflict {
+  AnalyzingConflict : Compare New Report\nvs Historical Data\n(Check Freshness)
+}
+
+AnalyzingConflict --> ReinforcingStatus : Data Agrees\n(Consensus)
+AnalyzingConflict --> RecalculatingScore : Data Disagrees\n(Conflict)
+
+state RecalculatingScore {
+  RecalculatingScore : Apply Weighting Algorithm\n(Newer data has higher priority)
+}
+
+state ReinforcingStatus {
+  ReinforcingStatus : Increase Confidence Score\nUpdate Timestamp
+}
+
+CreatingNewEntry --> DatabaseUpdated
+RecalculatingScore --> DatabaseUpdated
+ReinforcingStatus --> DatabaseUpdated
+
+DatabaseUpdated : Public Map shows\nnew status
+
+DatabaseUpdated --> [*]
+@enduml

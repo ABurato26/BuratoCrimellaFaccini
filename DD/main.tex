@@ -1,0 +1,180 @@
+% This template is freely taken by the MSc thesis template from School of
+% Industrial and Information Engineering at Politecnico di Milano.
+% Source: https://www.ingindinf.polimi.it/en/students/lessons-and-exams/
+% bachelors-and-masters-degree-exams/thesis-format-templates
+
+\documentclass{Configuration_Files/PoliMi3i_thesis}
+
+%------------------------------------------------------------------------------
+%	REQUIRED PACKAGES AND  CONFIGURATIONS
+%------------------------------------------------------------------------------
+
+% CONFIGURATIONS
+\usepackage{parskip} % For paragraph layout
+\usepackage{setspace} % For using single or double spacing
+\usepackage{emptypage} % To insert empty pages
+\usepackage{multicol} % To write in multiple columns (executive summary)
+\usepackage{enumitem} % For bulleted lists
+\usepackage{placeins} % For placing all images before a section
+\setlength\columnsep{15pt} % Column separation in executive summary
+\setlength\parindent{0pt} % Indentation
+\raggedbottom  
+
+% PACKAGES FOR TITLES
+\usepackage{titlesec}
+% \titlespacing{\section}{left spacing}{before spacing}{after spacing}
+\titlespacing{\section}{0pt}{3.3ex}{2ex}
+\titlespacing{\subsection}{0pt}{3.3ex}{1.65ex}
+\titlespacing{\subsubsection}{0pt}{3.3ex}{1ex}
+\usepackage{color}
+
+% PACKAGES FOR LANGUAGE AND FONT
+\usepackage[english]{babel} % The document is in English  
+\usepackage[utf8]{inputenc} % UTF8 encoding
+\usepackage[T1]{fontenc} % Font encoding
+\usepackage[11pt]{moresize} % Big fonts
+
+% PACKAGES FOR IMAGES
+\usepackage{graphicx}
+\usepackage{transparent} % Enables transparent images
+\usepackage{eso-pic} % For the background picture on the title page
+\usepackage{subfig} % Numbered and caption subfigures using \subfloat.
+\usepackage{tikz} % A package for high-quality hand-made figures.
+\usetikzlibrary{}
+\graphicspath{{./Images/}} % Directory of the images
+\usepackage{caption} % Coloured captions
+\usepackage{xcolor} % Coloured captions
+\usepackage{amsthm,thmtools,xcolor} % Coloured "Theorem"
+\usepackage{float}
+
+% STANDARD MATH PACKAGES
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage[overload]{empheq} % For braced-style systems of equations.
+\usepackage{fix-cm} 		% To override original LaTeX restrictions on sizes
+
+% PACKAGES FOR TABLES
+\usepackage{tabularx}
+\usepackage{longtable} 	% Tables that can span several pages
+\usepackage{colortbl}
+\usepackage{booktabs}
+
+% PACKAGES FOR ALGORITHMS (PSEUDO-CODE)
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% PACKAGES FOR REFERENCES & BIBLIOGRAPHY
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref} 				% Adds clickable links at references
+\usepackage{cleveref}
+\usepackage[square, numbers, sort&compress]{natbib} % Square brackets, citing references with numbers, citations sorted by appearance in the text and compressed
+\bibliographystyle{abbrvnat} % You may use a different style adapted to your field
+
+% OTHER PACKAGES
+\usepackage{pdfpages} 	% To include a pdf file
+\usepackage{afterpage}
+\usepackage{lipsum} % DUMMY PACKAGE
+\usepackage{fancyhdr} % For the headers
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\fancyhf{}
+
+% NEW INSERTIONS
+\usepackage{listings}	% Package to use external code snippets
+\lstset{					% Additional styling
+	keywordstyle=\color{red}\bfseries,
+	keywordstyle=[2]\color{blue}\bfseries,
+	keywordstyle=[3]\color{purple}\bfseries,
+	morekeywords={sig, fact, this, run, example},
+	morekeywords=[2]{abstract, extends, one, some, lone, all, in, and, or, set},
+    morekeywords=[3]{var},
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    	captionpos=b,
+    	tabsize=4
+}
+\input{Configuration_Files/config} % Input of configuration file
+\newcommand{\folder}{Chapters/}	% Custom command to add absolute path
+
+
+
+
+
+
+\begin{document}
+
+\fancypagestyle{plain}{%
+\fancyhf{} % Clear all header and footer fields
+\fancyhead[RO,RE]{\thepage} %RO=right odd, RE=right even
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}}
+
+%--- Start of title page
+\pagestyle{empty} % No page numbers
+\frontmatter % Roman page numbering style 
+
+\puttitle{
+    title={Best Bike Paths -- DD Document}, % Title of the project
+    name={Alessandro Burato, Gabriele Crimella, Davide Faccini}, % Student names
+    advisor={Elisabetta Di Nitto}, % Supervisor name
+    academicyear={2025-26},  % Academic Year
+} % These info will be put into your Title page 
+
+%----------------------------------------------------------------------------
+%	PREAMBLE PAGES: ABSTRACT (inglese e italiano), EXECUTIVE SUMMARY
+%----------------------------------------------------------------------------
+\startpreamble
+\setcounter{page}{1} % Set page counter to 1
+
+%----------------------------------------------------------------------------
+%	LIST OF CONTENTS/FIGURES/TABLES/SYMBOLS
+%----------------------------------------------------------------------------
+
+% TABLE OF CONTENTS
+\thispagestyle{empty}
+\tableofcontents % Table of contents 
+\thispagestyle{empty}
+\cleardoublepage
+
+
+\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+\mainmatter % Begin numeric (1,2,3...) page numbering
+
+% --------------------------------------------------------------------------
+% NUMBERED CHAPTERS % Regular chapters following
+% --------------------------------------------------------------------------
+\chapter{Introduction}
+\input{\folder/Chapter1}
+
+\chapter{Architectural Design}
+\input{\folder/Chapter2}
+
+\chapter{User Interface Design}
+\input{\folder/Chapter3}
+
+\chapter{Requirements Traceability}
+\input{\folder/Chapter4}
+
+\chapter{Implementation, Integration and Test Plan}
+\input{\folder/Chapter5}
+
+\chapter{Effort Spent}
+\input{\folder/Chapter6}
+
+\chapter{References}
+\input{\folder/Chapter7}
+
+% LIST OF FIGURES
+\listoffigures
+
+% LIST OF TABLES
+\listoftables
+
+\cleardoublepage
+
+\end{document}
