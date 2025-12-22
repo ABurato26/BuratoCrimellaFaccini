@@ -65,7 +65,11 @@ This diagram illustrates the backend logic for updating path attributes when new
 
 \textbf{Anomaly Detection and Validation}
 This diagram illustrates the lifecycle of a road anomaly (e.g., a pothole) from detection to publication. Since sensor data can generate false positives, the system implements a validation step. Potential anomalies are first flagged internally as ``Candidates'' and presented to the user at the end of the trip for confirmation before being stored as valid data.
-
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{"state_diagrams/anomaly.pdf"}
+    \caption{State diagram of the anomaly detection and validation process.}
+\end{figure}
 
 
 
