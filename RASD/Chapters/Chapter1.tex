@@ -25,10 +25,10 @@ G1 & Recognize suitable bike paths \\ \hline
 G2 & Allow the user to browse different bike paths \\ \hline
 G3 & Allow the user to see bike paths statistics \\ \hline
 G4 & Allow the user to search for paths between two locations \\ \hline
-G5 & Allow the user to see paths optimality based on other registered users' reviews \\ \hline
+G5 & Allow the user to see paths optimality based on other registered users' contributions \\ \hline
 G6 & Allow user to see weather information when available \\ \hline
 G7 & Allow users to register to the application using credentials \\ \hline
-G8 & Allow registered user to review published bike paths \\ \hline
+G8 & Merge different registered users' contributions of the same bike path \\ \hline
 G9 & Allow registered user to confirm or reject false positives in track recording \\ \hline
 G10 & Allow registered user to let the system automatically record suitable bike paths \\ \hline
 G11 & Allow registered user to manually create suitable bike paths \\ \hline
@@ -49,9 +49,12 @@ G14 & Allow registered user to add publishable information about bike paths \\ \
 \hline
 \textbf{WP} & \textbf{Description} \\ \hline
 WP1 & A user physically moves through space using a bicycle \\ \hline
-WP2 & The physical conditions of a bike path or street change (e.g., presence of potholes, road maintenance status, or obstacles) \\ \hline
-WP3 & The meteorological conditions in the geographic area vary (e.g., temperature, wind speed) \\ \hline
-WP4 & A user intends to reach a specific destination starting from a specific origin point \\ \hline
+WP2 & Streets have at least one status \\ \hline
+WP3 & The physical conditions of a bike path or street change (e.g., presence of potholes, road maintenance status, or obstacles) \\ \hline
+WP4 & The meteorological conditions in the geographic area vary (e.g., temperature, wind speed) \\ \hline
+WP5 & A user intends to reach a specific destination starting from a specific origin point \\ \hline
+WP6 & A user has his own device with him while biking \\ \hline
+WP7 & A user has the capacity to detect and report issues or anomalies encountered on a bike path \\ \hline
 \end{tabularx}
 \caption{World Phenomena}
 \label{tab:world-phenomena}
@@ -89,6 +92,7 @@ SP\_WC3 & The user manually inserts data regarding a street (e.g., street name, 
 SP\_WC4 & The user confirms or corrects information automatically detected by the system (e.g., confirming a pothole) \\ \hline
 SP\_WC5 & The user inputs search parameters for a path (origin and destination) \\ \hline
 SP\_WC6 & The external weather service transmits current condition data (e.g., temperature, wind) to the system \\ \hline
+SP\_WC7 & The user browse its saved trips \\ \hline
 \end{tabularx}
 \caption{Shared Phenomena -- World-Controlled}
 \label{tab:shared-sp-wc}
@@ -104,6 +108,7 @@ SP\_WC6 & The external weather service transmits current condition data (e.g., t
 SP\_MC1 & The system visualizes available bike paths between two points on a map, highlighting those with better scores \\ \hline
 SP\_MC2 & The system displays trip statistics to the user (speed, distance, etc.) \\ \hline
 SP\_MC3 & The system presents a confirmation request to the user regarding automatically detected information \\ \hline
+SP\_MC4 & The system presents a confirmation request to the user regarding the confirmation of starting the automatic record mode\\ \hline
 
 \end{tabularx}
 \caption{Shared Phenomena -- Machine-Controlled}
@@ -112,7 +117,7 @@ SP\_MC3 & The system presents a confirmation request to the user regarding autom
 
 \section{Definitions, Acronyms, Abbreviations}
 \begin{itemize}
-	\item BBP: Bike Buddy Project
+	\item BBP: Best Bike Paths
 	\item RASD: Requirements Analysis and Specification Document
 	\item WP: World Phenomenon
 	\item MP: Machine Phenomenon

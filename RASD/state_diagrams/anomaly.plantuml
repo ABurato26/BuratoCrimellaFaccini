@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+
+[*] --> Detecting
+Detecting : Monitoring sensors\n(Accel/Gyro)
+
+Detecting --> Candidate : Anomaly detected\n(Threshold exceeded)
+Candidate --> Detecting : Continuing\nto detect
+Candidate : Potential anomaly flagged\ninternally
+
+Candidate --> AwaitingValidation : Trip Ended
+AwaitingValidation : Presented to user\nfor confirmation
+
+AwaitingValidation --> Validated : User confirms\nanomaly
+Validated : Information stored\nas valid data
+
+AwaitingValidation --> FalsePositive : User rejects\nanomaly
+FalsePositive : Data discarded\ninternally
+
+Validated --> Publication : Data aggregated\nto community map
+Publication : Public map status\nupdated
+
+FalsePositive --> [*]
+Publication --> [*]
+@enduml
