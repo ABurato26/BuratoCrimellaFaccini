@@ -3,7 +3,29 @@
 \subsection{Mobile}
 \subsection{Backend}
 \section{Deployment View}
+
+In this section of the document we will be focusing on the whole deployment of BBP and the motivations behind our choices.
+ 
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{2-deploymentView.pdf}
+	\caption{Deployment View}
+\end{figure}
+
+We divided our system into three main tiers: presentation, application and data tiers (better explained in Section~\ref{subsec:three-tier}) to better isolate common features between all tangible and intangible instances of all the objects we used. Below, a list of all the actors and objects involved:
+\begin{itemize}
+	\item \textbf{Personal Device}: a personal device consists of a Sensor device (here modeled as the union of all the device's movement sensors) and an OS that can be either Android or iOS. It is to be intended as a personal piece of hardware such as a smartphone or smartwatch that is carried by the user throughout the execution of the application. The personal device communicates with the Application Server using a local view instance of the app, here called Application: every request made by the Application to the Application Server follows a RESTful interaction style over HTTPS.
+	\item \textbf{API Gateway}: it's a node offered by a third party (such as AWS, Cloudflare, Azure) that has a built-in WAF and load balancer to better distribute traffic to all the distributed Application Servers avoiding single points of failure. 
+	\item \textbf{Application Server}: it's a device that contains the logic of the application and connects together all the drivers needed to the application to work. It is connected with external APIs using REST and with multiple databases using a continuously working connection pool.
+	\item \textbf{Database}: we decided to have different databases (one main database, more replicas used only in read mode) with a connection pool contained inside the Application Server, so that databases are actually protected by a limited amount of opened connection and overload is not possible. This feature is extremely useful to minimize concurrency problems and the number of connections can be adjusted accordingly to the number of requests seen to have the optimal balance of hardware usage and system efficiency: we chose Linux as the OS because of its open source roots and MySQL for its robustness.
+\end{itemize}
+Now for a closer look at some of the components of the devices themselves:
+\begin{itemize}
+	\item \textbf{Application Artifact}: the client side application. It is used primary as the presentation layer and stores a signed JWT (JSON Web Token) used for authentication: it is connected with all sensors needed to detect movements in automated mode using cross-platform mobile frameworks.
+	\item \textbf{BBP Server App}: the actual model of our application. Here, the logic of the app is stored and ensures all operations are coherent with user requests following the MVC pattern: it is the recipient of all the managers and connects them to every driver needed to interface to external tools.
+\end{itemize}
 \section{Runtime View}
 \section{Component Interfaces}
 \section{Styles and Patterns}
+\label{subsec:three-tier}
 \section{Other Design Decisions}
