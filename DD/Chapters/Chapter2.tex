@@ -4,6 +4,351 @@
 \subsection{Backend}
 \section{Deployment View}
 \section{Runtime View}
+
+\section{Runtime View}
+\label{sec:runtime_view}
+
+This section illustrates how the architectural components interact to fulfill the primary user scenarios. For each scenario, a description of the execution flow is provided, referencing the corresponding sequence of interactions.
+
+The following scenarios have been selected to cover the core functionalities of the system:
+\begin{itemize}
+    \item \textbf{User Login}: The authentication process for registered users.
+    \item \textbf{Trip Recording and Storage}: The process of tracking a cyclist's trip, enriching it with weather data, and storing it persistently.
+    \item \textbf{Path Search}: The retrieval of bike paths based on specific criteria.
+    \item \textbf{Path Publication}: The mechanism allowing users to make their recorded trips available to the community.
+\end{itemize}
+
+\subsection{User Login}
+\label{subsec:runtime_login}
+
+This scenario describes how a registered User authenticates into the system to access private functionalities.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/login.pdf}
+    \caption{Runtime view for 'User Login'}
+    \label{fig:seq_login}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process begins when the User inputs their credentials (email and password) into the \texttt{App}. The \texttt{App} performs a preliminary local validation (e.g., format checking) before initiating network communication. If valid, the \texttt{App} sends a request containing the credentials and the current \texttt{DeviceID} to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager}, acting as the system entry point, delegates the identity verification to the \texttt{Authentication Manager}. To retrieve the user's stored data (such as password hash and salt), the \texttt{Authentication Manager} invokes the \texttt{Query Manager}, which executes the specific \texttt{SELECT} query against the \texttt{DBMS}.
+
+Upon receiving the user data:
+\begin{itemize}
+    \item \textbf{If the user is not found or the password hash does not match:} The \texttt{Authentication Manager} throws a specific exception. The \texttt{Dashboard Manager} catches this and returns an appropriate error message (e.g., 401 Unauthorized) to the \texttt{App}.
+    \item \textbf{If the credentials are valid:} 
+    \begin{enumerate}
+        \item The \texttt{Authentication Manager} generates a new Session Token.
+        \item It invokes the \texttt{Query Manager} again to update the "Last Login" timestamp in the \texttt{DBMS}.
+        \item Control returns to the \texttt{Dashboard Manager}. Before finalizing the response, the \texttt{Dashboard Manager} coordinates with the \texttt{Notification Manager} to register the User's \texttt{DeviceID}, enabling future push notifications. The \texttt{Notification Manager} persists this association via the \texttt{Query Manager}.
+        \item Finally, the \texttt{Dashboard Manager} returns the Session Token and User Profile to the \texttt{App}, which stores the token and redirects the user to the homepage.
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{User Registration}
+\label{subsec:runtime_signup}
+
+This scenario details the procedure for onboarding a new User into the system. It involves a coordinated interaction between authentication mechanisms, profile management, and notification services to ensure a complete account setup.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/signup.pdf}
+    \caption{Runtime view for 'User Registration'}
+    \label{fig:seq_signup}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process begins when the User submits their registration data (email, password, and personal details such as name and surname) via the \texttt{App}. The \texttt{App} executes a local validation logic (e.g., password strength, email format) to filter out malformed requests. If the data is valid, the \texttt{App} sends a composite request to the \texttt{Dashboard Manager}, including the current \texttt{DeviceID}.
+
+The \texttt{Dashboard Manager} acts as the central orchestrator for this multi-step transaction, delegating specific responsibilities to the appropriate sub-components:
+
+\begin{itemize}
+    \item \textbf{Step 1: Credential Verification and Creation.} The \texttt{Dashboard Manager} first invokes the \texttt{Authentication Manager}. This component uses the \texttt{Query Manager} to check if the provided email is already registered in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If the user exists, an exception is thrown, and the \texttt{Dashboard Manager} returns a conflict error (e.g., 409 Conflict) to the \texttt{App}.
+        \item If the user is new, the \texttt{Authentication Manager} hashes the password and instructs the \texttt{Query Manager} to persist the new security credentials. It then returns the new unique \texttt{UserID} to the \texttt{Dashboard Manager}.
+    \end{itemize}
+    
+    \item \textbf{Step 2: Profile Initialization.} Upon successful credential creation, the \texttt{Dashboard Manager} calls the \texttt{Profile Manager}. This component takes the personal information (name, surname, etc.) and the newly created \texttt{UserID} to initialize the user's business profile in the \texttt{DBMS} via the \texttt{Query Manager}. This ensures a strict separation between authentication data and user profile data.
+
+    \item \textbf{Step 3: Device Registration and Auto-Login.} To complete the onboarding:
+    \begin{enumerate}
+        \item The \texttt{Dashboard Manager} interacts with the \texttt{Notification Manager} to register the User's \texttt{DeviceID}, enabling immediate push notification capabilities.
+        \item It requests a new Session Token from the \texttt{Authentication Manager} to allow for an "auto-login" experience, so the user does not need to re-enter credentials immediately after signing up.
+        \item Finally, the \texttt{Dashboard Manager} aggregates the result and sends the Session Token back to the \texttt{App}, which redirects the User to the homepage.
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{User Logout}
+\label{subsec:runtime_logout}
+
+This scenario illustrates the secure termination of a User's session. It is designed as a symmetric operation to the login process, ensuring that both the security context (session validity) and the operational context (notification delivery) are properly dismantled.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/logout.pdf}
+    \caption{Runtime view for 'User Logout'}
+    \label{fig:seq_logout}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process is initiated when the User selects the logout option within the \texttt{App}. The \texttt{App} constructs a termination request containing the current Session Token and the Device ID, transmitting it to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager} orchestrates the teardown of the user's active context through two main phases:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Session Invalidation.} The \texttt{Dashboard Manager} first instructs the \texttt{Authentication Manager} to terminate the session.
+    \begin{itemize}
+        \item The \texttt{Authentication Manager} queries the \texttt{DBMS} via the \texttt{Query Manager} to verify the token's validity.
+        \item If valid, the token is physically removed or marked as expired in the database. This step is critical to prevent session replay attacks. If the session is already invalid (e.g., expired), the system handles the exception gracefully, ensuring the client is still forced to a logged-out state.
+    \end{itemize}
+    
+    \item \textbf{Phase 2: Notification Deregistration.} To ensure no further personal alerts are sent to the device, the \texttt{Dashboard Manager} coordinates with the \texttt{Notification Manager}.
+    \begin{itemize}
+        \item The \texttt{Notification Manager} invokes the \texttt{Query Manager} to remove the association between the user and the specific \texttt{DeviceID} in the \texttt{DBMS}. This mirrors the registration step performed during login/signup.
+    \end{itemize}
+\end{itemize}
+
+Upon the successful completion of server-side cleanup, the \texttt{Dashboard Manager} sends a confirmation to the \texttt{App}. The \texttt{App} then clears all local storage (cached tokens, user data) and redirects the User to the login screen.
+
+
+
+
+
+\subsection{Manual Trip Recording}
+\label{subsec:runtime_manual_recording}
+
+This scenario describes the process by which a Registered User manually reconstructs a trip by inputting a sequence of nodes and metadata. This functionality is crucial for documenting trips where GPS tracking was not available or for planning purposes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/manual.pdf}
+    \caption{Runtime view for 'Manual Trip Recording'}
+    \label{fig:seq_manual}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User selects the "Manual Mode" on the \texttt{App}. After acknowledging the introductory information, the process unfolds in three distinct phases managed by the \texttt{Recording Manager} via the \texttt{Dashboard Manager}:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Path Construction.} The User inputs the starting coordinates, followed by a sequence of subsequent nodes.
+    \begin{itemize}
+        \item For each node, the \texttt{App} sends a validation request. The \texttt{Recording Manager} verifies the consistency of the coordinates.
+        \item Upon successful validation, a new segment is created linking the previous node to the current one. Metadata such as obstacles or road status are associated with the segment at this stage. If the coordinates are invalid, the system enforces a correction loop without discarding the session.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Temporal Definition.} Once the path is defined, the User concludes the session and inputs the start and end times of the trip.
+    \begin{itemize}
+        \item The \texttt{Recording Manager} validates that the start time strictly precedes the end time. Invalid ranges trigger an error response, prompting the User to re-enter the data.
+    \end{itemize}
+
+    \item \textbf{Phase 3: Data Enrichment and Persistence.} Before saving, the system automatically enhances the raw data:
+    \begin{enumerate}
+        \item The \texttt{Recording Manager} iterates through the created segments and invokes the \texttt{External Interface} to request precise distance metrics from the \texttt{External APIs}.
+        \item If the external service fails (e.g., timeout or network error), the system is designed to skip the problematic segment and proceed, ensuring the overall process is resilient.
+        \item Once all available metrics are aggregated (calculating total distance and average speed), the \texttt{Recording Manager} uses the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
+        \item Finally, a summary of the recorded activity is returned to the \texttt{App} for display.
+    \end{enumerate}
+\end{itemize}
+
+
+
+\subsection{Automated Trip Recording}
+\label{subsec:runtime_automated_recording}
+
+This scenario details the "hands-free" recording mode, where the system leverages device sensors to detect activity and automates data collection. It features a complex flow involving local hardware interaction and concurrent server-side processes to enrich trip data in real-time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/automated.pdf}
+    \caption{Runtime view for 'Automated Trip Recording'}
+    \label{fig:seq_automated}
+\end{figure}
+
+\textbf{Description of the flow:}
+The workflow is initiated when the User activates "Automated Mode" on the \texttt{App}. The process is structured into three logical phases, distinguishing between local detection and server-side processing:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Motion Detection and Initialization.} 
+    \begin{itemize}
+        \item The \texttt{App} enters a monitoring loop, periodically querying the local \texttt{Device} for sensor metrics (accelerometer, gyroscope, and position).
+        \item Upon detecting a pattern consistent with cycling, the \texttt{App} prompts the User for confirmation.
+        \item Once confirmed, the \texttt{App} sends an initialization request to the \texttt{Dashboard Manager}, which instructs the \texttt{Recording Manager} to create a new active session.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Concurrent Recording Loops.} During the active trip, the system orchestrates two parallel execution threads to optimize data accuracy and API usage:
+    \begin{enumerate}
+        \item \textbf{High-Frequency Telemetry Loop (every 1s):} The \texttt{App} streams GPS coordinates to the \texttt{Recording Manager}. For every new segment detected, the system invokes the \texttt{External Interface} to fetch precise distance metrics from \texttt{External APIs}. Exception handling is in place to skip segments if the external service is unreachable, ensuring continuous recording.
+        \item \textbf{Low-Frequency Environmental Loop (every 5 mins):} To enrich the trip data without exhausting API quotas, the \texttt{Recording Manager} periodically triggers a weather check. It uses the \texttt{Weather Interface} to retrieve conditions from the \texttt{Weather API}. If the API fails, the system gracefully defaults to a "Data not available" state rather than interrupting the flow.
+    \end{enumerate}
+
+    \item \textbf{Phase 3: Termination and Persistence.}
+    \begin{itemize}
+        \item When the User manually stops the recording, the \texttt{App} signals the termination to the \texttt{Dashboard Manager}.
+        \item The \texttt{Recording Manager} finalizes the calculations (aggregating distances and speeds) and invokes the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
+        \item Finally, a summary of the performance metrics is returned to the User.
+    \end{itemize}
+\end{itemize}
+
+
+
+
+\subsection{Personal Trip Storage}
+\label{subsec:runtime_personal_storage}
+
+This scenario illustrates the management of the User's personal history of trips. It covers the retrieval of stored data and, crucially, the mechanism for toggling the visibility of a trip between "Private" (visible only to the owner) and "Public" (searchable by the community).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/personal.pdf}
+    \caption{Runtime view for 'Personal Trip Storage'}
+    \label{fig:seq_personal}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction is structured into two main logical phases: data retrieval and status modification.
+
+\begin{itemize}
+    \item \textbf{Phase 1: Retrieval of Trip Data.} 
+    When the User accesses the storage section, the \texttt{Dashboard Manager} delegates the request to the \texttt{Storage Manager}. This component interacts with the \texttt{Query Manager} to fetch the metadata list of trips owned by the specific User from the \texttt{DBMS}. A similar flow applies when the User requests the full details of a specific trip.
+
+    \item \textbf{Phase 2: Visibility Management (Publication/Unpublication).}
+    The core complexity lies in changing a trip's status. When the User toggles the visibility (e.g., "Make Public" or "Make Private"):
+    \begin{enumerate}
+        \item The request is routed to the \texttt{Publish Manager} (distinct from the Storage Manager). This component validates the request and invokes the \texttt{Query Manager} to execute an atomic \texttt{UPDATE} on the trip's status field in the \texttt{DBMS}.
+        \item \textbf{Success Path:} If the database confirms the update, the system acknowledges the change. For a "Make Public" action, this logically implies the trip becomes available for the system's "Data Merge" algorithms. The \texttt{App} updates the view immediately.
+        \item \textbf{Failure Path:} As shown in the diagram's alternative flows, if a persistence error occurs (e.g., database lock or connection failure), the system prioritizes consistency. The \texttt{Publish Manager} propagates the exception, the \texttt{Dashboard Manager} returns an error, and the \texttt{App} forces a reload of the list. This ensures the User never sees a "false positive" state where the UI shows "Public" while the DB remains "Private".
+    \end{enumerate}
+\end{itemize}
+
+
+
+\subsection{Path Search}
+\label{subsec:runtime_search}
+
+This scenario illustrates the workflow for retrieving bike paths based on geographical constraints. It emphasizes the validation logic performed by the backend to ensure data consistency before executing complex search queries.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/search.pdf}
+    \caption{Runtime view for 'Path Search'}
+    \label{fig:seq_search}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User inputs the desired start and end points via the \texttt{App} interface. The \texttt{App} displays a loading state and forwards the search criteria to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager} routes the request to the \texttt{Search Manager}, which orchestrates the retrieval process in two distinct logical steps to optimize resource usage:
+
+\begin{itemize}
+    \item \textbf{Step 1: Input Validation.} Before searching for paths, the \texttt{Search Manager} invokes the \texttt{Query Manager} to verify that both the start and end points correspond to valid locations existing in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If one or both points are invalid, the \texttt{Search Manager} raises an exception. The \texttt{App} receives an error message (e.g., "Points not valid"), displays a specific banner to the User, and reloads the search page to allow for correction.
+    \end{itemize}
+
+    \item \textbf{Step 2: Path Retrieval.} If the points are valid, the \texttt{Search Manager} instructs the \texttt{Query Manager} to execute the specific query to find all paths connecting the two locations.
+    \begin{itemize}
+        \item \textbf{No Paths Found:} If the query returns an empty result set, the system notifies the \texttt{App}. The User is informed via a "No paths found" banner, and the interface is reset for a new search.
+        \item \textbf{Search Successful:} If matching paths are found, the \texttt{Query Manager} returns the list of path objects. The \texttt{Search Manager} forwards this data through the \texttt{Dashboard Manager} to the \texttt{App}, which renders the results list for the User to browse.
+    \end{itemize}
+\end{itemize}
+
+
+
+\subsection{Browsing of Published Paths}
+\label{subsec:runtime_browse}
+
+This scenario depicts the workflow allowing Users to explore the catalog of publicly available bike paths within a specific geographical area. It highlights the filtering logic that ensures only content explicitly marked as "Public" is accessible to the general user base.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/browse.pdf}
+    \caption{Runtime view for 'Browsing of Published Paths'}
+    \label{fig:seq_browse}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User selects a geographical area of interest via the \texttt{App}. The interface displays a loading state while the request is forwarded to the \texttt{Dashboard Manager}, which delegates the operation to the \texttt{Search Manager}.
+
+The retrieval process is orchestrated in three sequential phases to ensure data consistency and validity:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Area Validation.} Before attempting any data retrieval, the \texttt{Search Manager} invokes the \texttt{Query Manager} to verify the existence of the requested area in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If the area ID is malformed or non-existent, the process terminates immediately, and the \texttt{App} prompts the User to select a valid location.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Public Paths Retrieval.} Upon successful validation, the \texttt{Search Manager} requests the list of paths associated with that area.
+    \begin{itemize}
+        \item Crucially, the query executed by the \texttt{Query Manager} includes a strict filter for \texttt{status = 'PUBLIC'}. Private trips stored by other users are strictly excluded at the database level.
+        \item If the query returns results, the list is displayed to the User. If the area contains no public paths, a specific notification is returned.
+    \end{itemize}
+
+    \item \textbf{Phase 3: Detail View.} The workflow concludes with the User selecting a specific path from the list.
+    \begin{enumerate}
+        \item The \texttt{App} requests the full details (including metrics like difficulty and rating) for the selected ID.
+        \item The \texttt{Search Manager} retrieves the complete object via the \texttt{Query Manager}.
+        \item Should an internal consistency error occur (e.g., the path was deleted moments before selection), the system handles the exception by notifying the User and refreshing the list, rather than crashing the application.
+    \end{enumerate}
+\end{itemize}
+
+
+
+
+\subsection{Obstacles Detection}
+\label{subsec:runtime_obstacles}
+
+This scenario details the advanced telemetry analysis performed during an automated recording session. It illustrates how the system leverages hardware sensor data (accelerometer and gyroscope) to identify potential road hazards and includes a human-in-the-loop verification step to ensure data accuracy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/obstacles.pdf}
+    \caption{Runtime view for 'Obstacles Detection'}
+    \label{fig:seq_obstacles}
+\end{figure}
+
+\textbf{Description of the flow:}
+The workflow is an extension of the Automated Recording mode. Once the recording session is initialized via the \texttt{Dashboard Manager}, the process executes in two distinct temporal stages:
+
+\begin{itemize}
+    \item \textbf{Stage 1: Real-Time Detection and Enrichment.} 
+    During the active trip, the \texttt{App} streams sensor metrics to the \texttt{Recording Manager} at one-second intervals.
+    \begin{enumerate}
+        \item \textbf{Distance Calculation:} The system invokes the \texttt{External Interface} to fetch segment lengths from \texttt{External APIs}. As depicted in the diagram, this interaction is designed to be resilient: if the external service returns an error, the specific segment is skipped, allowing the recording loop to continue uninterrupted.
+        \item \textbf{Anomaly Recognition:} Simultaneously, the \texttt{Recording Manager} analyzes the accelerometer and gyroscope data. If a motion pattern consistent with a road anomaly (e.g., a pothole or bump) is detected, the current segment is internally flagged as a "Potential Obstacle".
+    \end{enumerate}
+
+    \item \textbf{Stage 2: Post-Trip User Verification.}
+    When the User stops the recording, the system does not immediately save the trip but initiates a verification sequence.
+    \begin{enumerate}
+        \item The \texttt{Recording Manager} returns the list of flagged segments to the \texttt{App}.
+        \item The \texttt{App} presents these locations to the User, asking for confirmation. The User iterates through the list, confirming ("Yes") or rejecting ("No") the presence of an obstacle.
+        \item The \texttt{Dashboard Manager} collects this feedback and updates the segment data accordingly, filtering out false positives.
+    \end{enumerate}
+
+    \item \textbf{Stage 3: Persistence.}
+    Once the verification loop is complete, the \texttt{Recording Manager} calculates the final trip metrics and invokes the \texttt{Query Manager} to persist the validated Trip object (including confirmed obstacles) into the \texttt{DBMS}.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \section{Component Interfaces}
 \section{Styles and Patterns}
 \section{Other Design Decisions}

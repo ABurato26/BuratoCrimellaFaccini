@@ -1,0 +1,133 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "Registered\nUser" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Recording\nManager" as recMan
+    participant "External\nInterface" as extInt
+    participant "Query\nManager" as queryMan
+end box
+participant "External\nAPIs" as extApi <<System>>
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : startManualRecording()
+activate app
+app -> app : displayInfoBanner()
+app --> user : showInputPage()
+
+
+user -> app : inputStartNode(coordinates)
+
+app -> dashMan : validateNodeRequest(coordinates)
+activate dashMan
+dashMan -> recMan : validateCoordinates(coordinates)
+activate recMan
+
+alt invalid coordinates
+    recMan --> dashMan : return false
+    dashMan --> app : sendError("Invalid Coordinates")
+    app --> user : showBanner("Invalid Start Node")
+else valid coordinates
+    recMan -> recMan : initManualSession(coordinates)
+    recMan --> dashMan : sessionInitialized
+    deactivate recMan
+    dashMan --> app : nodeAccepted
+    deactivate dashMan
+    app --> user : showNextNodeForm()
+end
+
+
+loop while user wants to add nodes
+    user -> app : inputNextNode(coords, obstacles, roadStatus)
+    
+    app -> dashMan : addSegmentRequest(sessionID, coords, metadata)
+    activate dashMan
+    dashMan -> recMan : processNewSegment(coords, metadata)
+    activate recMan
+
+    alt invalid coordinates
+        recMan --> dashMan : error(InvalidGeoData)
+        dashMan --> app : sendError("Invalid Node")
+        app --> user : displayError("Node not valid, retry")
+        note right: Page reload for input
+    else valid coordinates
+        recMan -> recMan : createSegment(prevNode, newNode, metadata)
+        recMan --> dashMan : segmentAdded
+        deactivate recMan
+        dashMan --> app : confirmSegment()
+        deactivate dashMan
+        app --> user : displayBanner("Segment Created")
+    end
+end
+
+
+user -> app : clickFinishTrip()
+app --> user : showTimeInputPage()
+
+user -> app : inputTripTimes(startTime, endTime)
+
+app -> dashMan : finalizeTripRequest(sessionID, startTime, endTime)
+activate dashMan
+dashMan -> recMan : validateAndProcessTrip(startTime, endTime)
+activate recMan
+
+alt startTime > endTime
+    recMan --> dashMan : error(InvalidTimeRange)
+    dashMan --> app : sendError("Start time must be before End time")
+    app --> user : displayError("Invalid Time Range")
+    note right: Reload time input page
+else valid time range
+    recMan -> recMan : setTripTimes(startTime, endTime)
+    
+    ' --- LOOP 2: ENRICHMENT WITH EXTERNAL APIs ---
+    loop for each segment in trip
+        recMan -> extInt : getSegmentDistance(nodeA, nodeB)
+        activate extInt
+        extInt -> extApi : fetchDistance(coordsA, coordsB)
+        activate extApi
+        
+        alt API Call Successful
+            extApi --> extInt : distanceValue
+            extInt --> recMan : distanceValue
+            recMan -> recMan : updateSegmentDistance(segmentID, val)
+        else API Error / Timeout
+            extApi --> extInt : error
+            deactivate extApi
+            extInt --> recMan : null
+            deactivate extInt
+            note right of recMan : Segment ignored/skipped for metrics\ndue to API failure
+        end
+    end
+
+
+    recMan -> recMan : calculateTotalMetrics(totalDist, avgSpeed)
+    
+    ' Persist Trip
+    recMan -> queryMan : saveCompleteTrip(tripData)
+    activate queryMan
+    queryMan -> db : INSERT INTO Trips ...
+    activate db
+    db --> queryMan : success
+    deactivate db
+    queryMan --> recMan : tripID
+    deactivate queryMan
+
+    recMan --> dashMan : tripFinalized(summaryData)
+    deactivate recMan
+
+    dashMan --> app : showTripSummary(summaryData)
+    deactivate dashMan
+    
+    app --> user : displaySummaryPage()
+end
+
+deactivate app
+deactivate user
+@enduml
