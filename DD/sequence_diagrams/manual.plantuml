@@ -20,57 +20,79 @@ activate user
 user -> app : startManualRecording()
 activate app
 app -> app : displayInfoBanner()
-app --> user : showInputPage()
+app --> user : showManualInputPage()
 
-
-user -> app : inputStartNode(coordinates)
-
-app -> dashMan : validateNodeRequest(coordinates)
+' --- INITIALIZATION ---
+app -> dashMan : initRecordingSession(userID)
 activate dashMan
-dashMan -> recMan : validateCoordinates(coordinates)
+dashMan -> recMan : createSession()
 activate recMan
+recMan --> dashMan : sessionID
+deactivate recMan
+dashMan --> app : sessionReady(sessionID)
+deactivate dashMan
 
-alt invalid coordinates
-    recMan --> dashMan : return false
-    dashMan --> app : sendError("Invalid Coordinates")
-    app --> user : showBanner("Invalid Start Node")
-else valid coordinates
-    recMan -> recMan : initManualSession(coordinates)
-    recMan --> dashMan : sessionInitialized
-    deactivate recMan
-    dashMan --> app : nodeAccepted
-    deactivate dashMan
-    app --> user : showNextNodeForm()
-end
+' --- LOOP: INSERTION OF STREETS (User Logic) ---
+note right of user: The user insert the sequence of streets\n(e.g. Viale Tunisia, Viale V. Pisani)
 
-
-loop while user wants to add nodes
-    user -> app : inputNextNode(coords, obstacles, roadStatus)
+loop while user wants to add streets
+    user -> app : inputStreet(streetName, optionalMetadata)
     
-    app -> dashMan : addSegmentRequest(sessionID, coords, metadata)
+    app -> dashMan : addStreetRequest(sessionID, streetName)
     activate dashMan
-    dashMan -> recMan : processNewSegment(coords, metadata)
+    dashMan -> recMan : processStreetSegment(streetName)
     activate recMan
 
-    alt invalid coordinates
-        recMan --> dashMan : error(InvalidGeoData)
-        dashMan --> app : sendError("Invalid Node")
-        app --> user : displayError("Node not valid, retry")
-        note right: Page reload for input
-    else valid coordinates
-        recMan -> recMan : createSegment(prevNode, newNode, metadata)
-        recMan --> dashMan : segmentAdded
-        deactivate recMan
-        dashMan --> app : confirmSegment()
-        deactivate dashMan
-        app --> user : displayBanner("Segment Created")
+    ' --- INFERENCE LOGIC: RESOLVE STREET & CONNECTIVITY ---
+    recMan -> extInt : resolveStreetGeometry(streetName)
+    activate extInt
+    extInt -> extApi : getGeoData(streetName)
+    activate extApi
+    
+    alt Street Not Found / API Error
+        extApi --> extInt : error/empty
+        extInt --> recMan : null
+        recMan --> dashMan : error(InvalidStreet)
+        dashMan --> app : sendError("Street not found")
+        app --> user : displayError("Street name not valid, retry")
+    else Street Found
+        extApi --> extInt : streetGeometryData
+        deactivate extApi
+        extInt --> recMan : streetGeometryData
+        deactivate extInt
+        
+        ' Il sistema inferisce la connessione con la strada precedente
+        recMan -> recMan : inferPathContinuity(prevStreet, currentStreet)
+        
+        alt Continuity Valid (Intersection Found)
+            recMan -> recMan : addSegmentToPath(streetData)
+            recMan --> dashMan : streetAccepted
+            dashMan --> app : confirmStreetAdded()
+            app --> user : updatePathList(streetName)
+        else Continuity Invalid (Streets do not intersect)
+             recMan --> dashMan : error(TopologyError)
+             dashMan --> app : sendError("Street is not connected to previous one")
+             app --> user : displayError("Roads must be connected")
+        end
     end
+    deactivate recMan
+    deactivate dashMan
 end
 
+' --- OPTIONAL: ADD ATTRIBUTES (Potholes/Status) ---
+opt User adds details to specific segments
+    user -> app : addAttribute(streetID, obstacleType, status)
+    app -> dashMan : updateSegmentAttributes(sessionID, streetID, data)
+    activate dashMan
+    dashMan -> recMan : updateMetadata(streetID, data)
+    recMan --> dashMan : success
+    dashMan --> app : detailsSaved
+    deactivate dashMan
+end
 
+' --- FINALIZATION ---
 user -> app : clickFinishTrip()
 app --> user : showTimeInputPage()
-
 user -> app : inputTripTimes(startTime, endTime)
 
 app -> dashMan : finalizeTripRequest(sessionID, startTime, endTime)
@@ -82,13 +104,13 @@ alt startTime > endTime
     recMan --> dashMan : error(InvalidTimeRange)
     dashMan --> app : sendError("Start time must be before End time")
     app --> user : displayError("Invalid Time Range")
-    note right: Reload time input page
 else valid time range
     recMan -> recMan : setTripTimes(startTime, endTime)
     
-    ' --- LOOP 2: ENRICHMENT WITH EXTERNAL APIs ---
-    loop for each segment in trip
-        recMan -> extInt : getSegmentDistance(nodeA, nodeB)
+    ' --- LOOP 2: STATISTICS CALCULATION (System Inference) ---
+    '
+    loop for each inferred segment in path
+        recMan -> extInt : getSegmentDistance(nodeStart, nodeEnd)
         activate extInt
         extInt -> extApi : fetchDistance(coordsA, coordsB)
         activate extApi
@@ -96,18 +118,17 @@ else valid time range
         alt API Call Successful
             extApi --> extInt : distanceValue
             extInt --> recMan : distanceValue
-            recMan -> recMan : updateSegmentDistance(segmentID, val)
-        else API Error / Timeout
+            recMan -> recMan : aggregateMetrics(distance, speed)
+        else API Error
             extApi --> extInt : error
             deactivate extApi
             extInt --> recMan : null
             deactivate extInt
-            note right of recMan : Segment ignored/skipped for metrics\ndue to API failure
+            recMan -> recMan : estimateDistance(geometry)
         end
     end
 
-
-    recMan -> recMan : calculateTotalMetrics(totalDist, avgSpeed)
+    recMan -> recMan : calculateFinalScore()
     
     ' Persist Trip
     recMan -> queryMan : saveCompleteTrip(tripData)

@@ -10,14 +10,6 @@
 
 This section illustrates how the architectural components interact to fulfill the primary user scenarios. For each scenario, a description of the execution flow is provided, referencing the corresponding sequence of interactions.
 
-The following scenarios have been selected to cover the core functionalities of the system:
-\begin{itemize}
-    \item \textbf{User Login}: The authentication process for registered users.
-    \item \textbf{Trip Recording and Storage}: The process of tracking a cyclist's trip, enriching it with weather data, and storing it persistently.
-    \item \textbf{Path Search}: The retrieval of bike paths based on specific criteria.
-    \item \textbf{Path Publication}: The mechanism allowing users to make their recorded trips available to the community.
-\end{itemize}
-
 \subsection{User Login}
 \label{subsec:runtime_login}
 
@@ -122,7 +114,7 @@ Upon the successful completion of server-side cleanup, the \texttt{Dashboard Man
 \subsection{Manual Trip Recording}
 \label{subsec:runtime_manual_recording}
 
-This scenario describes the process by which a Registered User manually reconstructs a trip by inputting a sequence of nodes and metadata. This functionality is crucial for documenting trips where GPS tracking was not available or for planning purposes.
+This scenario describes the process by which a Registered User manually reconstructs a trip by inputting a sequence of nodes and metadata.
 
 \begin{figure}[H]
     \centering
@@ -135,22 +127,23 @@ This scenario describes the process by which a Registered User manually reconstr
 The interaction begins when the User selects the "Manual Mode" on the \texttt{App}. After acknowledging the introductory information, the process unfolds in three distinct phases managed by the \texttt{Recording Manager} via the \texttt{Dashboard Manager}:
 
 \begin{itemize}
-    \item \textbf{Phase 1: Path Construction.} The User inputs the starting coordinates, followed by a sequence of subsequent nodes.
+    \item \textbf{Phase 1: Path Reconstruction by Streets.} The User inputs the sequence of \textbf{street names} traversed during the trip.
     \begin{itemize}
-        \item For each node, the \texttt{App} sends a validation request. The \texttt{Recording Manager} verifies the consistency of the coordinates.
-        \item Upon successful validation, a new segment is created linking the previous node to the current one. Metadata such as obstacles or road status are associated with the segment at this stage. If the coordinates are invalid, the system enforces a correction loop without discarding the session.
+        \item For each inserted street, the \texttt{Recording Manager} interacts with the \texttt{External Interface} to validate the street's existence and retrieve its geometry.
+        \item Crucially, the system performs a \textbf{topology check} (inference) to ensure the new street physically intersects or connects with the previous one. 
+        \item Upon successful validation of continuity, the street is added to the path list. The User can optionally associate metadata (e.g., obstacles or road status) to specific street segments. If a street is not found or not connected, the system prompts the User for correction.
     \end{itemize}
 
-    \item \textbf{Phase 2: Temporal Definition.} Once the path is defined, the User concludes the session and inputs the start and end times of the trip.
+    \item \textbf{Phase 2: Temporal Definition.} Once the sequence of streets is defined, the User concludes the session and manually inputs the \textbf{start and end times} of the trip.
     \begin{itemize}
-        \item The \texttt{Recording Manager} validates that the start time strictly precedes the end time. Invalid ranges trigger an error response, prompting the User to re-enter the data.
+        \item The \texttt{Recording Manager} validates that the start time strictly precedes the end time. Invalid ranges trigger an error response, prompting the User to re-enter the temporal data.
     \end{itemize}
 
-    \item \textbf{Phase 3: Data Enrichment and Persistence.} Before saving, the system automatically enhances the raw data:
+    \item \textbf{Phase 3: Data Enrichment and Persistence.} Before saving, the system automatically enhances the reconstructed path:
     \begin{enumerate}
-        \item The \texttt{Recording Manager} iterates through the created segments and invokes the \texttt{External Interface} to request precise distance metrics from the \texttt{External APIs}.
-        \item If the external service fails (e.g., timeout or network error), the system is designed to skip the problematic segment and proceed, ensuring the overall process is resilient.
-        \item Once all available metrics are aggregated (calculating total distance and average speed), the \texttt{Recording Manager} uses the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
+        \item The \texttt{Recording Manager} iterates through the inferred segments (derived from street intersections) and invokes the \texttt{External Interface} to request accurate distance metrics from the \texttt{External APIs}.
+        \item If the external service fails (e.g., timeout), the system attempts to estimate the distance based on the retrieved geometry to ensure process resilience.
+        \item Once all metrics are aggregated (calculating total distance and average speed based on the time range), the \texttt{Recording Manager} uses the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
         \item Finally, a summary of the recorded activity is returned to the \texttt{App} for display.
     \end{enumerate}
 \end{itemize}

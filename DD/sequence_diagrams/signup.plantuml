@@ -26,11 +26,9 @@ note right: Local validation
 alt invalid format
     app --> user : showFormatError()
 else valid format
-    ' Request includes credential data AND profile data
     app -> dashMan : signUpRequest(email, pass, profileData, deviceID)
     activate dashMan
 
-    ' STEP 1: CREATE AUTH CREDENTIALS
     dashMan -> authMan : registerCredentials(email, password)
     activate authMan
     
@@ -48,8 +46,10 @@ else valid format
         dashMan --> app : sendError(409, "Email taken")
         app --> user : displayError("User already registered")
     else user new
-        authMan -> authMan : hashPassword(password)
-        authMan -> queryMan : createAuthUser(email, hash)
+        authMan -> authMan : generateSalt()
+        authMan -> authMan : hashPassword(password, salt)
+        
+        authMan -> queryMan : createAuthUser(email, hash, salt)
         activate queryMan
         queryMan -> db : INSERT INTO Users ...
         activate db
@@ -61,7 +61,6 @@ else valid format
         authMan --> dashMan : return newUserID
         deactivate authMan
 
-        ' STEP 2: INITIALIZE PROFILE (The missing part)
         note right of dashMan: Orchestration: now create the Profile
         dashMan -> profMan : createProfile(newUserID, profileData)
         activate profMan
@@ -71,16 +70,18 @@ else valid format
         activate db
         db --> queryMan : success
         deactivate db
+        
+        queryMan --> profMan : success
+        deactivate queryMan
+        
         profMan --> dashMan : profileCreated
         deactivate profMan
 
-        ' STEP 3: REGISTER DEVICE & AUTO-LOGIN
         dashMan -> notifMan : registerDevice(newUserID, deviceID)
         activate notifMan
         notifMan --> dashMan : confirmed
         deactivate notifMan
         
-        ' Generate Token for immediate access
         dashMan -> authMan : generateToken(newUserID)
         activate authMan
         authMan --> dashMan : SessionToken
