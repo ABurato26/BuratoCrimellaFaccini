@@ -1,0 +1,134 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "Registered\nUser" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Storage\nManager" as storeMan
+    participant "Publish\nManager" as pubMan
+    participant "Query\nManager" as queryMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : accessPersonalStorage()
+activate app
+
+' --- PHASE 1: LIST RETRIEVAL ---
+app -> dashMan : getTripListRequest(userID)
+activate dashMan
+dashMan -> storeMan : fetchUserTrips(userID)
+activate storeMan
+storeMan -> queryMan : selectTripsByOwner(userID)
+activate queryMan
+queryMan -> db : SELECT * FROM Trips WHERE owner = ?
+activate db
+db --> queryMan : TripListResultSet
+deactivate db
+queryMan --> storeMan : List<TripMetadata>
+deactivate queryMan
+storeMan --> dashMan : TripList
+deactivate storeMan
+dashMan --> app : return(TripList)
+deactivate dashMan
+app --> user : displayTripList()
+
+' --- PHASE 2: SELECTION & TOGGLE VISIBILITY ---
+user -> app : selectTrip(tripID)
+app -> dashMan : getTripDetailRequest(tripID)
+activate dashMan
+dashMan -> storeMan : fetchTripDetails(tripID)
+activate storeMan
+storeMan -> queryMan : selectTripFullData(tripID)
+activate queryMan
+queryMan -> db : SELECT ...
+activate db
+db --> queryMan : TripData
+deactivate db
+queryMan --> storeMan : TripObject
+deactivate queryMan
+storeMan --> dashMan : TripObject
+deactivate storeMan
+dashMan --> app : return(TripObject)
+deactivate dashMan
+app --> user : showTripDetails(status)
+
+' --- LOGIC: CHANGE VISIBILITY ---
+alt User wants to MAKE PUBLIC (currently Private)
+    user -> app : clickMakePublic()
+    app -> dashMan : setVisibility(tripID, PUBLIC)
+    activate dashMan
+    dashMan -> pubMan : publishTrip(tripID)
+    activate pubMan
+    note right: Logic to include data in\npublic search/merge
+    pubMan -> queryMan : updateTripStatus(tripID, PUBLIC)
+    activate queryMan
+    
+    queryMan -> db : UPDATE Trips SET status = 'PUBLIC' ...
+    activate db
+    
+    alt DB Update Successful
+        db --> queryMan : success
+        queryMan --> pubMan : success
+        pubMan --> dashMan : statusUpdated
+        dashMan --> app : actionSuccess()
+        app --> user : showBanner("Trip is now Public")
+        app -> app : updateView(PUBLIC)
+    
+    else DB Update Failed (Exception)
+        db --> queryMan : error
+        deactivate db
+        queryMan --> pubMan : throw PersistenceException
+        deactivate queryMan
+        pubMan --> dashMan : error(InternalError)
+        deactivate pubMan
+        dashMan --> app : sendError("Update Failed")
+        deactivate dashMan
+        
+        app --> user : displayError("Could not update status")
+        app -> app : reloadTripList()
+    end
+
+else User wants to MAKE PRIVATE (currently Public)
+    user -> app : clickMakePrivate()
+    app -> dashMan : setVisibility(tripID, PRIVATE)
+    activate dashMan
+    dashMan -> pubMan : unpublishTrip(tripID)
+    activate pubMan
+    note right: Logic to remove data from\npublic search/merge
+    pubMan -> queryMan : updateTripStatus(tripID, PRIVATE)
+    activate queryMan
+    
+    queryMan -> db : UPDATE Trips SET status = 'PRIVATE' ...
+    activate db
+    
+    alt DB Update Successful
+        db --> queryMan : success
+        deactivate db
+        queryMan --> pubMan : success
+        deactivate queryMan
+        pubMan --> dashMan : statusUpdated
+        deactivate pubMan
+        dashMan --> app : actionSuccess()
+        deactivate dashMan
+        app --> user : showBanner("Trip is now Private")
+        app -> app : updateView(PRIVATE)
+        
+    else DB Update Failed
+        ' Logic mirrors the failure case above
+        queryMan --> pubMan : throw PersistenceException
+        pubMan --> dashMan : error(InternalError)
+        dashMan --> app : sendError("Update Failed")
+        app --> user : displayError("Could not update status")
+        app -> app : reloadTripList()
+    end
+end
+
+deactivate app
+deactivate user
+@enduml

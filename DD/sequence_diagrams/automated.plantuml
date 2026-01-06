@@ -1,0 +1,155 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "Registered\nUser" as user
+participant "App" as app <<Mobile>>
+participant "Device" as dev <<Hardware>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Recording\nManager" as recMan
+    participant "External\nInterface" as extInt
+    participant "Weather\nInterface" as weaInt
+    participant "Query\nManager" as queryMan
+end box
+participant "External\nAPIs" as extApi <<System>>
+participant "Weather\nAPI" as weaApi <<System>>
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : selectAutomatedMode()
+activate app
+
+' --- PHASE 1: MOTION DETECTION ---
+loop every 1 second (Detection Phase)
+    app -> dev : getSensorData(Position, Accel, Gyro)
+    activate dev
+    dev --> app : return metrics
+    deactivate dev
+    
+    app -> app : analyzeMotionPattern()
+    
+    break pedaling activity detected
+        app --> user : displayBanner("Pedaling Detected. Start Recording?")
+    end
+end
+
+user -> app : confirmStartRecording()
+app --> user : showBanner("Recording Started")
+
+app -> dashMan : startSessionRequest(initialCoords)
+activate dashMan
+dashMan -> recMan : initSession()
+activate recMan
+recMan --> dashMan : sessionID
+deactivate recMan
+dashMan --> app : ack
+deactivate dashMan
+
+' --- PHASE 2: RECORDING (PARALLEL LOOPS) ---
+par Concurrent Recording Processes
+
+    ' --- LOOP 2: GPS & DISTANCE (1 sec) ---
+    loop every 1 second
+        app -> dev : getPositionData()
+        activate dev
+        dev --> app : coordinates
+        deactivate dev
+
+        app -> dashMan : sendTelemetry(sessionID, coords)
+        activate dashMan
+        dashMan -> recMan : processTelemetry(coords)
+        activate recMan
+
+        opt from 2nd iteration onwards (Segment Creation)
+            recMan -> recMan : createSegment(prevNode, currNode)
+            
+            recMan -> extInt : calculateDistance(nodeA, nodeB)
+            activate extInt
+            extInt -> extApi : fetchDistance(coordsA, coordsB)
+            activate extApi
+            
+            alt API Call Successful
+                extApi --> extInt : distanceValue
+                extInt --> recMan : distanceValue
+                recMan -> recMan : updateTripMetrics(distance)
+            else External API Error
+                extApi --> extInt : error
+                deactivate extApi
+                extInt --> recMan : null
+                deactivate extInt
+                note right of recMan : Exception caught:\nSegment ignored, loop continues
+            end
+        end
+        recMan --> dashMan : ack
+        deactivate recMan
+        dashMan --> app : ack
+        deactivate dashMan
+    end
+
+else
+
+    ' --- LOOP 3: WEATHER (5 mins) ---
+    loop every 5 minutes
+        app -> dashMan : triggerWeatherCheck(sessionID, currentLoc)
+        activate dashMan
+        dashMan -> recMan : enrichWithWeather(location)
+        activate recMan
+        
+        recMan -> weaInt : getCurrentConditions(location)
+        activate weaInt
+        weaInt -> weaApi : fetchWeatherData(lat, lon)
+        activate weaApi
+        
+        alt Weather API Successful
+            weaApi --> weaInt : weatherData (temp, wind, etc.)
+            weaInt --> recMan : weatherData
+            recMan -> recMan : appendWeatherData(weatherData)
+        else Weather API Error / Timeout
+            weaApi --> weaInt : error
+            deactivate weaApi
+            weaInt --> recMan : null
+            deactivate weaInt
+            recMan -> recMan : appendWeatherData("Data not available")
+        end
+        
+        recMan --> dashMan : ack
+        deactivate recMan
+        deactivate dashMan
+    end
+
+end
+
+' --- PHASE 3: TERMINATION ---
+user -> app : stopRecording()
+
+app -> dashMan : stopSessionRequest(sessionID)
+activate dashMan
+dashMan -> recMan : finalizeTrip()
+activate recMan
+
+recMan -> recMan : calculateFinalMetrics()
+
+' Storage
+recMan -> queryMan : saveTrip(tripObject)
+activate queryMan
+queryMan -> db : INSERT INTO Trips ...
+activate db
+db --> queryMan : success
+deactivate db
+queryMan --> recMan : tripID
+deactivate queryMan
+
+recMan --> dashMan : tripSummary
+deactivate recMan
+
+dashMan --> app : showTripSummary(metrics)
+deactivate dashMan
+
+app --> user : displaySummaryPage()
+deactivate app
+deactivate user
+@enduml

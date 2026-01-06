@@ -1,0 +1,98 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Authentication\nManager" as authMan
+    participant "Profile\nManager" as profMan
+    participant "Notification\nManager" as notifMan
+    participant "Query\nManager" as queryMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : inputRegistrationData(email, pass, name, surname)
+activate app
+
+app -> app : validateFormat()
+note right: Local validation
+
+alt invalid format
+    app --> user : showFormatError()
+else valid format
+    app -> dashMan : signUpRequest(email, pass, profileData, deviceID)
+    activate dashMan
+
+    dashMan -> authMan : registerCredentials(email, password)
+    activate authMan
+    
+    authMan -> queryMan : checkEmailExistence(email)
+    activate queryMan
+    queryMan -> db : SELECT count(*) ...
+    activate db
+    db --> queryMan : count
+    deactivate db
+    queryMan --> authMan : exists
+    deactivate queryMan
+
+    alt user exists
+        authMan --> dashMan : throw UserAlreadyExists
+        dashMan --> app : sendError(409, "Email taken")
+        app --> user : displayError("User already registered")
+    else user new
+        authMan -> authMan : generateSalt()
+        authMan -> authMan : hashPassword(password, salt)
+        
+        authMan -> queryMan : createAuthUser(email, hash, salt)
+        activate queryMan
+        queryMan -> db : INSERT INTO Users ...
+        activate db
+        db --> queryMan : success
+        deactivate db
+        queryMan --> authMan : newUserID
+        deactivate queryMan
+        
+        authMan --> dashMan : return newUserID
+        deactivate authMan
+
+        note right of dashMan: Orchestration: now create the Profile
+        dashMan -> profMan : createProfile(newUserID, profileData)
+        activate profMan
+        profMan -> queryMan : insertProfileDetails(newUserID, name, surname...)
+        activate queryMan
+        queryMan -> db : INSERT INTO Profiles ...
+        activate db
+        db --> queryMan : success
+        deactivate db
+        
+        queryMan --> profMan : success
+        deactivate queryMan
+        
+        profMan --> dashMan : profileCreated
+        deactivate profMan
+
+        dashMan -> notifMan : registerDevice(newUserID, deviceID)
+        activate notifMan
+        notifMan --> dashMan : confirmed
+        deactivate notifMan
+        
+        dashMan -> authMan : generateToken(newUserID)
+        activate authMan
+        authMan --> dashMan : SessionToken
+        deactivate authMan
+
+        dashMan --> app : signUpSuccess(SessionToken)
+        deactivate dashMan
+
+        app --> user : redirect(HomePage)
+    end
+end
+deactivate app
+deactivate user
+@enduml
