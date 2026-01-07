@@ -35,9 +35,9 @@ queryMan --> searchMan : isValid
 deactivate queryMan
 
 alt Points not valid
-    searchMan --> dashMan : error(InvalidPointsException)
-    dashMan --> app : sendError("Points not valid")
-    app --> user : displayBanner("Points not valid")
+    searchMan --> dashMan : InvalidPointsException
+    dashMan --> app : HTTP 400 (Invalid Points)
+    app --> user : "Points not valid" Message
     app -> app : reloadEmptySearchPage()
 
 else Points valid
@@ -52,19 +52,19 @@ else Points valid
     deactivate queryMan
 
     alt No paths found (List is empty)
-        searchMan --> dashMan : return(EmptyList)
-        dashMan --> app : sendError("No paths found")
+        searchMan --> dashMan : Empty List
+        dashMan --> app : HTTP 404 (No paths found)
         deactivate dashMan
-        app --> user : displayBanner("No paths found")
+        app --> user : "No paths found" Message
         app -> app : reloadEmptySearchPage()
     
     else Paths found (Success)
-        searchMan --> dashMan : return(PathList)
+        searchMan --> dashMan : List<Path>
         deactivate searchMan
         activate dashMan
-        dashMan --> app : returnSearchResults(PathList)
+        dashMan --> app : HTTP 200 (List<Path>)
         deactivate dashMan
-        app --> user : displayResults(PathList)
+        app --> user : Search Results View
     end
 end
 
