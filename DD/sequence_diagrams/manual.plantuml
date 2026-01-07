@@ -20,7 +20,7 @@ activate user
 user -> app : startManualRecording()
 activate app
 app -> app : displayInfoBanner()
-app --> user : showManualInputPage()
+app --> user : Manual Input Form
 
 ' --- INITIALIZATION ---
 app -> dashMan : initRecordingSession(userID)
@@ -29,7 +29,7 @@ dashMan -> recMan : createSession()
 activate recMan
 recMan --> dashMan : sessionID
 deactivate recMan
-dashMan --> app : sessionReady(sessionID)
+dashMan --> app : HTTP 200 (sessionID)
 deactivate dashMan
 
 ' --- LOOP: INSERTION OF STREETS (User Logic) ---
@@ -52,9 +52,9 @@ loop while user wants to add streets
     alt Street Not Found / API Error
         extApi --> extInt : error/empty
         extInt --> recMan : null
-        recMan --> dashMan : error(InvalidStreet)
-        dashMan --> app : sendError("Street not found")
-        app --> user : displayError("Street name not valid, retry")
+        recMan --> dashMan : InvalidStreetException
+        dashMan --> app : HTTP 404 (Street not found)
+        app --> user : "Street name not valid" message
     else Street Found
         extApi --> extInt : streetGeometryData
         deactivate extApi
@@ -66,13 +66,13 @@ loop while user wants to add streets
         
         alt Continuity Valid (Intersection Found)
             recMan -> recMan : addSegmentToPath(streetData)
-            recMan --> dashMan : streetAccepted
-            dashMan --> app : confirmStreetAdded()
-            app --> user : updatePathList(streetName)
+            recMan --> dashMan : StreetData (Confirmed)
+            dashMan --> app : HTTP 200 OK
+            app --> user : Updated Path List View
         else Continuity Invalid (Streets do not intersect)
-             recMan --> dashMan : error(TopologyError)
-             dashMan --> app : sendError("Street is not connected to previous one")
-             app --> user : displayError("Roads must be connected")
+             recMan --> dashMan : TopologyException
+             dashMan --> app : HTTP 409 (Not Connected)
+             app --> user : "Roads must be connected" message
         end
     end
     deactivate recMan
@@ -85,14 +85,14 @@ opt User adds details to specific segments
     app -> dashMan : updateSegmentAttributes(sessionID, streetID, data)
     activate dashMan
     dashMan -> recMan : updateMetadata(streetID, data)
-    recMan --> dashMan : success
-    dashMan --> app : detailsSaved
+    recMan --> dashMan : true
+    dashMan --> app : HTTP 200 OK
     deactivate dashMan
 end
 
 ' --- FINALIZATION ---
 user -> app : clickFinishTrip()
-app --> user : showTimeInputPage()
+app --> user : Time Input Form
 user -> app : inputTripTimes(startTime, endTime)
 
 app -> dashMan : finalizeTripRequest(sessionID, startTime, endTime)
@@ -101,9 +101,9 @@ dashMan -> recMan : validateAndProcessTrip(startTime, endTime)
 activate recMan
 
 alt startTime > endTime
-    recMan --> dashMan : error(InvalidTimeRange)
-    dashMan --> app : sendError("Start time must be before End time")
-    app --> user : displayError("Invalid Time Range")
+    recMan --> dashMan : InvalidTimeRangeException
+    dashMan --> app : HTTP 400 (Invalid Time Range)
+    app --> user : "Invalid Time Range" message
 else valid time range
     recMan -> recMan : setTripTimes(startTime, endTime)
     
@@ -140,13 +140,13 @@ else valid time range
     queryMan --> recMan : tripID
     deactivate queryMan
 
-    recMan --> dashMan : tripFinalized(summaryData)
+    recMan --> dashMan : TripSummaryData
     deactivate recMan
 
-    dashMan --> app : showTripSummary(summaryData)
+    dashMan --> app : HTTP 200 (TripSummaryData)
     deactivate dashMan
     
-    app --> user : displaySummaryPage()
+    app --> user : Trip Summary Page
 end
 
 deactivate app

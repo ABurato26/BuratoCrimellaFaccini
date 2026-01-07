@@ -113,7 +113,6 @@ else
             deactivate weaApi
             weaInt --> recMan : null
             deactivate weaInt
-            recMan -> recMan : appendWeatherData("Data not available")
         end
         
         recMan --> dashMan : ack

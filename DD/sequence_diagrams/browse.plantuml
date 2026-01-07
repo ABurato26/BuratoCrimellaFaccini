@@ -37,9 +37,9 @@ queryMan --> searchMan : isValid
 deactivate queryMan
 
 alt Area Not Valid
-    searchMan --> dashMan : error(InvalidAreaException)
-    dashMan --> app : sendError("Area not valid")
-    app --> user : displayBanner("Area not valid")
+    searchMan --> dashMan : InvalidAreaException
+    dashMan --> app : HTTP 400 (Invalid Area)
+    app --> user : "Area not valid" Message
     app -> app : loadEmptySearchPage()
 
 else Area Valid
@@ -56,17 +56,17 @@ else Area Valid
     deactivate queryMan
 
     alt No Public Paths Found
-        searchMan --> dashMan : return(EmptyList)
-        dashMan --> app : sendError("No public path found")
-        app --> user : displayBanner("No public path found")
+        searchMan --> dashMan : Empty List
+        dashMan --> app : HTTP 404 (No paths found)
+        app --> user : "No public path found" Message
         app -> app : loadEmptySearchPage()
 
     else Paths Found (Success)
-        searchMan --> dashMan : return(PathList)
+        searchMan --> dashMan : List<PathMetadata>
         deactivate searchMan
-        dashMan --> app : showResults(PathList)
+        dashMan --> app : HTTP 200 (List<PathMetadata>)
         deactivate dashMan
-        app --> user : displayPathList(PathList)
+        app --> user : Path List View
         
         ' --- VISIBLE SECTION TITLE ---
         
@@ -84,20 +84,20 @@ else Area Valid
         alt Internal Error / Path Not Found
             db --> queryMan : error / null
             deactivate db
-            queryMan --> searchMan : throw PersistenceException
+            queryMan --> searchMan : PersistenceException
             deactivate queryMan
-            searchMan --> dashMan : error(InternalServerError)
+            searchMan --> dashMan : InternalServerError
             deactivate searchMan
-            dashMan --> app : sendError("Detailed data unavailable")
+            dashMan --> app : HTTP 500 (Detailed data unavailable)
             deactivate dashMan
-            app --> user : displayBanner("Error loading details")
+            app --> user : "Error loading details" Message
             app -> app : reloadPathList()
         
         else Success (Detail Retrieval)
             queryMan --> searchMan : PathObject
             searchMan --> dashMan : PathObject
-            dashMan --> app : returnPathDetails(PathObject)
-            app --> user : showPathSummary(distance, difficulty, rating)
+            dashMan --> app : HTTP 200 (PathObject)
+            app --> user : Path Detail View (Stats & Map)
         end
     end
 end

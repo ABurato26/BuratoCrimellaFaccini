@@ -23,16 +23,15 @@ app -> app : validateFormat(email)
 note right: Local validation before\nnetwork request
 
 alt invalid format
-    app --> user : showFormatError()
+    app --> user : "Invalid Format Error"
 else valid format
-    ' Include deviceID for notification registration
+
     app -> dashMan : loginRequest(email, password, deviceID)
     activate dashMan
 
     dashMan -> authMan : authenticateUser(email, password)
     activate authMan
 
-    ' AUTH -> QUERY MANAGER (Abstraction Layer)
     authMan -> queryMan : fetchUserByEmail(email)
     activate queryMan
     
@@ -45,37 +44,33 @@ else valid format
     deactivate queryMan
 
     alt user not found
-        authMan --> dashMan : throw UserNotFoundException
-        dashMan --> app : sendError(404, "Account not found")
-        app --> user : displayError("User not registered")
+        authMan --> dashMan : UserNotFoundException
+        dashMan --> app : HTTP 404 (Account not found)
+        app --> user : "User not registered" message
     
     else user found
         authMan -> authMan : verifyPassword(password, storedHash, salt)
         
         alt password mismatch
-            authMan --> dashMan : throw InvalidCredentialsException
-            dashMan --> app : sendError(401, "Invalid password")
-            app --> user : displayError("Wrong credentials")
+            authMan --> dashMan : InvalidCredentialsException
+            dashMan --> app : HTTP 401 (Invalid password)
+            app --> user : "Wrong credentials" message
         
         else password matches
-            ' Token Generation
             authMan -> authMan : generateSessionToken(userID)
             
-            ' Update Login Timestamp via QueryManager
             authMan -> queryMan : executeUpdateLastLogin(userID, timestamp)
             activate queryMan
             queryMan -> db : UPDATE Users SET last_login = ? ...
             activate db
             db --> queryMan : success
             deactivate db
-            queryMan --> authMan : confirmUpdate
+            queryMan --> authMan : true
             deactivate queryMan
             
-            authMan --> dashMan : return SessionToken, UserProfile
+            authMan --> dashMan : SessionToken, UserProfile
             deactivate authMan
 
-            ' NOTIFICATION MANAGER INTEGRATION
-            ' Register device for push notifications upon successful login
             dashMan -> notifMan : registerDeviceToken(userID, deviceID)
             activate notifMan
             notifMan -> queryMan : storeDeviceToken(userID, deviceID)
@@ -86,15 +81,14 @@ else valid format
             deactivate db
             queryMan --> notifMan : success
             deactivate queryMan
-            notifMan --> dashMan : registrationConfirmed
+            notifMan --> dashMan : true
             deactivate notifMan
 
-            ' Final Response
-            dashMan --> app : loginSuccess(SessionToken, UserProfile)
+            dashMan --> app : HTTP 200 OK (SessionToken, UserProfile)
             deactivate dashMan
 
             app -> app : storeSession(SessionToken)
-            app --> user : redirect(HomePage)
+            app --> user : Home Page View
         end
     end
 end
