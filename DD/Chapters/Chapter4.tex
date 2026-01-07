@@ -1,0 +1,79 @@
+\section{Requirements Traceability}
+
+This section describes the traceability between the system requirements and the software components responsible for their implementation. Each requirement defined in Section~3.2.1 is mapped to the manager that fulfills it, we also added a Client Application section to highlight sensor-based requirements.
+
+\subsection*{Authentication Manager}
+\begin{itemize}
+	\item \textbf{R1}: The system shall allow new users to register an account
+	\item \textbf{R2}: The system shall allow users not registered to access the application without an account
+	\item \textbf{R3}: The system shall allow registered users to log in to the application
+	\item \textbf{R5}: The system shall allow users to log out of their current session
+\end{itemize}
+
+\subsection*{Profile Manager}
+\begin{itemize}
+	\item \textbf{R4}: The system shall allow registered users to view and update their personal profile information
+	\item \textbf{R47}: The system shall distinguish between declared public trips and private ones
+	\item \textbf{R48}: The system shall allow registered users to visualize a summary of the trip
+\end{itemize}
+
+\subsection*{Recording Manager}
+\begin{itemize}
+	\item \textbf{R6}: The system shall allow registered users to record their cycling trips
+	\item \textbf{R7}: The system shall store recorded trips to maintain a history of the user’s cycling activities
+	\item \textbf{R8}: The system shall compute and display total distance covered for each trip
+	\item \textbf{R9}: The system shall compute and display average speed for each trip
+	\item \textbf{R10}: The system shall compute and display total time spent for each trip
+	\item \textbf{R11}: The system shall compute and display elevation gain for each trip
+	\item \textbf{R12}: The system shall compute and display calories spent for each trip
+	\item \textbf{R13}: The system shall compute and display additional performance metrics for the trips
+	\item \textbf{R28}: The system shall analyze sensor data to identify potential path irregularities
+	\item \textbf{R46}: The system shall allow registered users to manually insert the duration of the trip
+\end{itemize}
+
+\subsection*{Storage Manager}
+\begin{itemize}
+	\item \textbf{R7}: The system shall store recorded trips to maintain a history of the user’s cycling activities
+	\item \textbf{R38}: The system shall collect paths data and keep it saved
+\end{itemize}
+
+\subsection*{Look Publish Manager}
+\begin{itemize}
+	\item \textbf{R15}: The system shall allow registered users to insert information about bike paths
+	\item \textbf{R16}: The system shall allow registered users to make publishable information about bike paths
+	\item \textbf{R17}: The system shall allow registered users to add info about the status of a bike path
+	\item \textbf{R18}: The system shall allow registered users to add the presence of relevant obstacles on the bike path
+	\item \textbf{R31}: The system shall allow registered users to mark their inserted data as ``publishable''
+	\item \textbf{R39}: The system shall visualize paths data
+	\item \textbf{R40}: The system shall filter paths through various attributes
+	\item \textbf{R41}: The system shall allow the user to search through public paths
+\end{itemize}
+
+\subsection*{Search Manager}
+\begin{itemize}
+	\item \textbf{R21}: The system shall calculate the distance of a path
+	\item \textbf{R34}: The system shall find bike paths given an origin and a destination
+	\item \textbf{R35}: The system shall visualize the bike paths connecting the specified origin and destination on a map
+	\item \textbf{R36}: The system shall compute a score for each path based on its status and effectiveness
+	\item \textbf{R37}: If multiple paths exist, the system shall display them sorted by their calculated score
+\end{itemize}
+
+\subsection*{Merge Manager}
+\begin{itemize}
+	\item \textbf{R32}: The system shall merge information about the same path from multiple users
+	\item \textbf{R33}: The system shall prioritize data based on timeframe and number of confirmations
+\end{itemize}
+
+\subsection*{Notification Manager}
+\begin{itemize}
+	\item \textbf{R30}: The system shall require the user to confirm or correct automatically acquired data
+\end{itemize}
+
+\subsection*{Client Application}
+\begin{itemize}
+	\item \textbf{R6}: The system shall allow registered users to record their cycling trips
+	\item \textbf{R25}: The system shall automatically infer that the registered user is cycling based on their speed
+	\item \textbf{R26}: The system shall collect GPS data to reconstruct the path followed by the user during the ride
+	\item \textbf{R27}: The system shall acquire data from the mobile device’s accelerometer and gyroscope
+	\item \textbf{R29}: The system shall require the user to confirm or correct automatically acquired sensor data
+\end{itemize}
