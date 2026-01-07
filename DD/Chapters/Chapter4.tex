@@ -1,7 +1,6 @@
-\section{Requirements Traceability}
+This section describes the traceability between the system requirements and the software components responsible for their implementation. Each requirement defined in Section~3 of the RASD document is mapped to the manager that fulfills it, we also added a Client Application section to highlight sensor-based requirements.
 
-This section describes the traceability between the system requirements and the software components responsible for their implementation. Each requirement defined in Section~3.2.1 is mapped to the manager that fulfills it, we also added a Client Application section to highlight sensor-based requirements.
-
+\section{Functional Requirements}
 \subsection*{Authentication Manager}
 \begin{itemize}
 	\item \textbf{R1}: The system shall allow new users to register an account
@@ -77,3 +76,12 @@ This section describes the traceability between the system requirements and the 
 	\item \textbf{R27}: The system shall acquire data from the mobile device’s accelerometer and gyroscope
 	\item \textbf{R29}: The system shall require the user to confirm or correct automatically acquired sensor data
 \end{itemize}
+
+\section{Non-Functional Requirements}
+As previously described in the RASD document in section~3.3, here we explain how the performance requirements are granted through design decisions.
+
+\subsection{Latency and Concurrency}
+By having standard 4G/5G connection and a solid client-side application, it is sufficient to send numerical coordinates as data from the server to the application to locally render the path on the map visualization of the device, also as stated in the RASD document the publication of path doesn't need much work of the client-side device and can be done asynchronously. The large number of users is granted by the possibility of having virtually as many application servers as the owner of the system wants thanks to the implemented architecture and the API Gateway.
+
+\subsection{Data Storage}
+Having a main database as the head of write operations coupled with read-only databases used for historical data (such as old trips and paths) and a local client-side cache made for personal trips only and immediatly accessible data (such as trip statistics) meets the standard described in the RASD.
