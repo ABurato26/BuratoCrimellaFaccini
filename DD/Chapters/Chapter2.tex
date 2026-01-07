@@ -458,16 +458,174 @@ The workflow is an extension of the Automated Recording mode. Once the recording
 
 
 
-
-
-
-
-
-
-
-
-
 \section{Component Interfaces}
+
+This section outlines the functional interfaces of the system components. Each interface lists the specific operations exposed by each component, strictly derived from the Runtime Sequence Diagrams.
+
+\subsection{Mobile Application}
+The client-side component acting as the interaction frontend and sensor data collector.
+
+        \texttt{validateFormat(input)}\\
+        \texttt{displayBanner(message)}\\
+        \texttt{analyzeMotionPattern()}\\
+        \texttt{getSensorData(Position, Accel, Gyro)}\\
+        \texttt{getPositionData()}\\
+        \texttt{storeSession(sessionTocken)}\\
+        \texttt{clearLocalSession()}\\
+        \texttt{startManualRecording()}\\
+        \texttt{inputStreet(streetName, optionalMetadata)}\\
+        \texttt{addAttribute(streetID, obstacleType, status)}\\
+        \texttt{clickFinishTrip()}\\
+        \texttt{inputTripTime(startTime, endTime)}\\
+        \texttt{selectAutomatedMode()}\\
+        \texttt{confirmStartRecording()}\\
+        \texttt{stopRecording()}\\
+        \texttt{acessPersonalStorage()}\\
+        \texttt{selectTrip(tripID)}\\
+        \texttt{clickMakePublic()}\\
+        \texttt{clickMakePrivate()}\\
+        \texttt{InputSearchCriteria(startPoint, endPoint)}\\
+        \texttt{showLoadingBanner()}\\
+        \texttt{browsePathsRequest(areaID)}\\
+        \texttt{selectPath(pathID)}\\
+        \texttt{startAutomatedMode()}\\
+
+
+
+\subsection{Dashboard Manager}
+The API Gateway that validates and routes client requests to specific logic managers.
+
+        \texttt{startSessionRequest(initialCoords)}\\
+        \texttt{stopSessionRequest(sessionID)}\\
+        \texttt{initRecordingSession(userID)}\\
+        \texttt{finalizeTripRequest(sessionID)}\\
+        \texttt{sendTelemetry(sessionID, metrics)}\\
+        \texttt{triggerWeatherCheck(sessionID, currentLoc)}\\
+        \texttt{addStreetRequest(sessionID, streetName)}\\
+        \texttt{updateSegmentAttributes(sessionID, streetID, data)}\\
+        \texttt{submitFeedback(segmentID, isConfirmed)}\\
+        \texttt{loginRequest(email, password, deviceID)}\\
+        \texttt{signUpRequest(email, pass, profileData, deviceID)}\\
+        \texttt{logoutRequest(sessionToken, deviceID)}\\
+        \texttt{getTripListRequest(userID)}\\
+        \texttt{getTripDetailRequest(tripID)}\\
+        \texttt{setVisibility(tripID, status)}\\
+        \texttt{searchPathRequest(startPoint, endPoint)}\\
+        \texttt{getPublicPaths(areaID)}\\
+        \texttt{getPathDetails(pathID)}
+        
+
+\subsection{Recording Manager}
+Handles active sessions, sensor fusion, and path inference.
+ì
+    
+        \texttt{initSession()}\\
+        \texttt{createSession()}\\
+        \texttt{processTelemetry(metrics)}\\
+        \texttt{processStreetSegment(streetName)}\\
+        \texttt{enrichWithWeather(location)}\\
+        \texttt{updateMetadata(streetID, data)}\\
+        \texttt{prepareVerificationData()}\\
+        \texttt{updateObstacleData(segmentID, isConfirmed)}\\
+        \texttt{validateAndProcessTrip(startTime, endTime)}\\
+        \texttt{finalizeTrip()}\\
+        \texttt{inferPathContinuity(prevStreet, currentStreet)}\\
+        \texttt{addSegmentToPath(streetData)}\\
+        \texttt{finalizeTripRequest(sessionID, startTime, endTime)}\\
+        \texttt{setTripTime(startTime, endTime)}\\
+        \texttt{aggregateMetrics(distance, speed)}\\
+        \texttt{estimateDistance(geometry)}\\
+        \texttt{calculateFinalScore()}\\
+        \texttt{createSegment(prevNode, currNode)}\\
+        \texttt{updateTripMetrics(distance)}\\
+        \texttt{appendWeatherData(weatherData)}\\
+        \texttt{calculateFinalMetrics()}\\
+        \texttt{analyzeMotionForObstacle(accel, gyro)}\\
+        \texttt{flagSegmentAsObstacle(segmentID)}
+
+
+\subsection{Authentication Manager}
+Manages credentials and session validity.
+    
+        \texttt{authenticateUser(email, password)}\\
+        \texttt{registerCredentials(email, password)}\\
+        \texttt{terminateSession(sessionToken)}\\
+        \texttt{generateToken(userID)}\\
+        \texttt{verifyPassword(password, hash, salt)}\\
+        \texttt{generateSalt()}\\
+        \texttt{hashPassword(password, salt)}
+
+\subsection{Search Manager}
+Executes pathfinding and public path retrieval logic.
+    
+        \texttt{findPaths(startPoint, endPoint)}\\
+        \texttt{retrievePublishedPaths(areaID)}\\
+        \texttt{retrievePathDetail(pathID)}
+
+\subsection{Storage Manager}
+Retrieves personal trip history.
+
+        \texttt{fetchUserTrips(userID)}\\
+        \texttt{fetchTripDetails(tripID)}ì
+
+\subsection{Publish Manager}
+Manages the visibility status of trips.
+
+    
+        \texttt{publishTrip(tripID)}\\
+        \texttt{unpublishTrip(tripID)}
+
+\subsection{Notification Manager}
+Handles device tokens for push notifications.
+
+    
+        \texttt{registerDeviceToken(userID, deviceID)}\\
+        \texttt{registerDevice(newUserID, deviceID)}\\
+        \texttt{unregisterDevice(deviceID)}
+
+\subsection{External \& Weather Interfaces}
+Wrappers for third-party REST APIs.
+
+    
+        \texttt{calculateDistance(nodeA, nodeB)}\\
+        \texttt{getSegmentDistance(nodeStart, nodeEnd)}\\
+        \texttt{resolveStreetGeometry(streetName)}\\
+        \texttt{getCurrentConditions(location)}\\
+        \texttt{calculateDistance(nnodeA, nodeB)}
+
+\subsection{Query Manager}
+DAO layer executing all database transactions.
+
+        \texttt{saveTrip(tripObject)}\\
+        \texttt{saveCompleteTrip(tripData)}\\
+        \texttt{selectTripsByOwner(userID)}\\
+        \texttt{selectTripFullData(tripID)}\\
+        \texttt{updateTripStatus(tripID, status)}\\
+        \texttt{fetchUserByEmail(email)}\\
+        \texttt{createAuthUser(email, hash, salt)}\\
+        \texttt{checkEmailExistence(email)}\\
+        \texttt{insertProfileDetails(newUserID, name, surname...)}\\
+        \texttt{retrieveSessionStatus(sessionToken)}\\
+        \texttt{deleteSession(sessionToken)}\\
+        \texttt{executeUpdateLastLogin(userID, timestamp)}\\
+        \texttt{checkAreaValidity(areaID)}\\
+        \texttt{fetchPathsByAreaAndStatus(areaID, status)}\\
+        \texttt{fetchFullPathData(pathID)}\\
+        \texttt{validateLocationExistence(startPoint, endPoint)}\\
+        \texttt{queryPathsByEndpoints(startPoint, endPoint)}\\
+        \texttt{storeDeviceToken(userID, deviceID)}\\
+        \texttt{removeDeviceToken(deviceID)}\\
+        \texttt{retrieveSessionStatus(sessionToken)}
+
+\subsection{Profile Manager}
+Handles user profile informations.
+
+        \texttt{createProfile(newuserID, profileData)}
+
+
+
+
+
 
 \section{Styles and Patterns}
 \label{sec:three-tier}
