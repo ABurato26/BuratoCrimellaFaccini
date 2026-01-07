@@ -1,0 +1,89 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Authentication\nManager" as authMan
+    participant "Notification\nManager" as notifMan
+    participant "Query\nManager" as queryMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : clickLogout()
+activate app
+
+' App handles the request to server
+app -> dashMan : logoutRequest(sessionToken, deviceID)
+activate dashMan
+
+' STEP 1: SESSION INVALIDATION
+dashMan -> authMan : terminateSession(sessionToken)
+activate authMan
+
+authMan -> queryMan : retrieveSessionStatus(sessionToken)
+activate queryMan
+queryMan -> db : SELECT valid FROM Sessions WHERE token = ?
+activate db
+db --> queryMan : status
+deactivate db
+queryMan --> authMan : isValid
+deactivate queryMan
+
+alt session invalid or expired
+    authMan --> dashMan : throw InvalidSessionException
+    
+    ' Even if server fails, App should likely force local logout, 
+    ' but here we show the protocol error response.
+    dashMan --> app : sendError(401, "Session already expired")
+    
+    app -> app : clearLocalSession()
+    app --> user : redirect(LoginScreen)
+
+else session valid
+    ' Invalidate Token in DB
+    authMan -> queryMan : deleteSession(sessionToken)
+    activate queryMan
+    queryMan -> db : DELETE FROM Sessions WHERE token = ?
+    activate db
+    db --> queryMan : success
+    deactivate db
+    queryMan --> authMan : success
+    deactivate queryMan
+    
+    authMan --> dashMan : sessionTerminated
+    deactivate authMan
+
+    ' STEP 2: NOTIFICATION CLEANUP (Symmetric to Login)
+    ' Remove device association to stop push notifications
+    dashMan -> notifMan : unregisterDevice(deviceID)
+    activate notifMan
+    notifMan -> queryMan : removeDeviceToken(deviceID)
+    activate queryMan
+    queryMan -> db : DELETE FROM DeviceTokens WHERE device_id = ?
+    activate db
+    db --> queryMan : success
+    deactivate db
+    queryMan --> notifMan : success
+    deactivate queryMan
+    
+    notifMan --> dashMan : deviceUnregistered
+    deactivate notifMan
+
+    ' FINAL CONFIRMATION
+    dashMan --> app : logoutSuccess()
+    deactivate dashMan
+
+    app -> app : clearLocalSession()
+    app --> user : redirect(LoginScreen)
+end
+
+deactivate app
+deactivate user
+@enduml

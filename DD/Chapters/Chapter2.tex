@@ -1,0 +1,661 @@
+\section{Overview}
+Here we represent an overview of how the entire BBP architecture is composed of:
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{Images/Overview.drawio.pdf}
+	\caption{Overview}
+\end{figure}
+
+\subsection{Client Side}
+\begin{itemize}
+	\item \textbf{Client}: Represents the end-user, categorized as either a Registered User or a Guest (Unregistered User). They interact with the platform to search for routes, record trips, or contribute road status data
+	\item \textbf{App}: A mobile application, compatible with Android and iOS, that serves as the primary user interface. It is responsible for high-speed data acquisition from geospatial sensors (GPS) and Inertial Measurement Units (IMU) to track movement and detect road anomalies like potholes
+\end{itemize}
+
+\subsection{Server Side}
+\begin{itemize}
+	\item \textbf{API Gateway}: Acts as the secure entry point for all requests originating from the mobile application. It manages communication using HTTPS/TLS protocols to ensure the integrity of sensitive geolocation data transmitted to the backend. It is responsible for load balancing requests among BBP Server instance
+	\item \textbf{BBP Server}: The central component of the system architecture that implements the core business logic. It handles Path Scoring and Ranking, resolves data conflicts during Information Merging, processes Automated Trip Recording guesses, and manages user authentication sessions
+	\item \textbf{DBMS Server}: The Database Management System that serves as the persistent repository for the platform. It stores all data, including user profiles, saved routes, and system logs. It acts as the central repository for all essential information required by the platform
+	\item \textbf{Weather API}: An interface with external meteorological services. It allows the system to retrieve real-time environmental data, like temperature and wind speed, to enrich trip logs with local weather context
+	\item \textbf{Bike Path API}: A specialized external service utilized to Search Path. It provides the necessary data to visualize existing cycling networks
+	\item \textbf{External APIs}: General category for third-party services. These are used for geocoding, street name resolution, and up-to-date base-map rendering to ensure the reliability of the road network presented to users, and most importantly to calculate the distance between points during recordings
+\end{itemize}
+
+\newpage
+\section{Component View}
+\subsection{High Level Diagram}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{Images/HighLevel.drawio.pdf}
+	\caption{High Level Diagram}
+\end{figure}
+
+In the figure above is the high-level component diagram of BBP where it's represented the external components 
+of BBP and how they communicate with the BBP server, in particular:
+\begin{itemize}
+	\item \textbf{App}: This component represents the front-end interface used by cyclists to interact with the system. It communicates with the server via the Dashboard and Notification interfaces
+	\item \textbf{DBMS (Database Management System)}: Connected via the DBMS Interface, this is the centralized repository for the system, it's used by different managers in the server application
+	\item \textbf{Bike API}: The system communicates with this API to find cycling routes and retrieve up-to-date information regarding road networks and cycling-compatible paths, only used by search manager to respond request like search path in a zone
+	\item \textbf{Weather API}: This dedicated service provides real-time meteorological conditions, such as temperature and wind speed, which the system uses to enrich trip data and help users analyze their performance relative to the environment. Only used by recording manager
+	\item \textbf{External APIs}: These interfaces are used specifically for geocoding (converting coordinates to street names) and performing precise distance calculations between two GPS points. Only used by recording manager
+\end{itemize}
+\newpage
+
+\subsection{Low Level Diagram}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{Images/LowLevel.drawio.pdf}
+	\caption{Low Level Diagram}
+\end{figure}
+
+The figure above represents the complete architecture of BBP with each components inside the BBP Server:
+\begin{itemize}
+	\item \textbf{Authentication Manager}: Serves as the security gatekeeper for the BBP system. It is responsible for handling all procedures related to user identity verification, 
+	including the registration of new accounts and the secure login of existing users. This component validates credentials against stored data, manages session states 
+	(such as guest versus authenticated access), and ensures that only authorized users can access sensitive features like trip recording and history management
+	\item \textbf{Dashboard Manager}: Acts as the central orchestration layer for the user interface, serving as the primary bridge between the mobile application (App) 
+	and the various backend sub-systems. It aggregates data from the storage, profile, and recording modules to present a cohesive view to the user, such as displaying the "Home" screen 
+	or summarizing recent activities. It ensures that the information requested by the Dashboard Interface is routed to the correct internal manager for processing
+	\item \textbf{Storage Manager}: Is tasked with the persistence and retrieval of historical cycling data. It manages the user's personal log of completed trips, ensuring that GPS traces, 
+	timestamped statistics (speed, distance), and performance metrics are securely saved for future reference. This component allows users to access their "Trip History" and is responsible 
+	for differentiating between private data and data that has been flagged for public contribution
+	\item \textbf{Look Publish Manager}: Facilitates the community-sharing aspects of the platform. It handles the logic required for browsing paths published by other users, 
+	allowing the system to filter and retrieve "public" routes based on geographic areas. Furthermore, it manages the transition of a trip from a private recording to 
+	a public resource, ensuring that the user's intent to share their route with the community is processed and reflected in the system
+	\item \textbf{Search Manager}: Engineers the route discovery process. It processes user requests for paths between specific origin and destination points, calculating optimal 
+	routes based on available data. This manager implements the scoring algorithms that evaluate paths not just by distance, but by the quality of the road surface and the absence of obstacles, 
+	identifying the "best" path as defined by the community data
+	\item \textbf{Profile Manager}: Administers all user-specific data and preferences. It allows registered users to view and update their personal details, 
+	such as account credentials and privacy settings. Additionally, it aggregates cumulative statistics to provide the user with a comprehensive summary of their engagement with the platform
+	\item \textbf{Recording Manager}: Orchestrates the active data acquisition lifecycle during a cycling session. It supports both "Manual Mode" (where users input data after a trip) and "Automated Mode" (which uses real-time GPS and sensor data). 
+	It interfaces with external APIs and device sensors to capture geospatial coordinates and detect anomalies like potholes in real-time, preparing this raw data for validation and eventual storage
+	\item \textbf{Notification Manager}: Handles the dissemination of system alerts and prompts to the user. It is responsible for triggering push notifications, such as the alert asking a user to confirm if they wish to start recording when cycling speed is detected. 
+	It ensures that the user is prompted at the appropriate times to validate automated detections, such as confirming the presence of a pothole at the end of a trip
+	\item \textbf{Merge Manager}: Implements the core logic for data consistency and conflict resolution. It is responsible for aggregating path information from multiple users regarding the same street segment. 
+	This manager applies algorithms to weigh new data against historical records—prioritizing data freshness and confirmation counts, to update the global "score" and status of a path, ensuring the community map reflects the most accurate current conditions
+	\item \textbf{Query Manager}: Serves as the data access layer, abstracting the complexity of the database interactions from the other business logic components. 
+	It receives data requests from the various managers and translates them into operations compatible with the DBMS. It ensures that data is efficiently read from or written to 
+	the underlying database infrastructure while maintaining data integrity
+\end{itemize}
+
+\subsubsection*{Recording Manager}
+Here we describe the Recording Manager component in detail:
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{Images/Recording_Manager.drawio.pdf}
+	\caption{Recording Manager}
+\end{figure}
+
+\begin{itemize}
+	\item \textbf{Automated Mode Manager}: The Automated Mode Manager is responsible for the real-time acquisition of trip data without requiring constant user interaction.
+	It implements the logic to infer cycling activity by monitoring the user's speed and initiates data collection when a specific threshold is exceeded. This component interfaces 
+	directly with the mobile device's sensors to capture GPS coordinates for path reconstruction, as well as accelerometer and gyroscope readings to detect potential path irregularities. 
+	\item \textbf{Manual Mode Manager}: The Manual Mode Manager handles the "offline reporting" workflow, allowing users to log cycling activities after they have occurred 
+	It provides the functionality for users to reconstruct their route by inputting a sequence of street names or selecting segments on a map, rather than relying on real-time GPS tracking. 
+	This component ensures that users can manually specify essential metadata, such as the total duration of the trip and the specific timeframes. Furthermore, it manages the annotation process, 
+	allowing users to manually insert status updates or report obstacles for specific segments of the reconstructed path
+	\item \textbf{Data Required Manager}: The Data Required Manager acts as an enrichment engine that enhances basic trip data with context and precise metrics using external services. 
+	It interacts with the Weather Interface to retrieve historical meteorological conditions corresponding to the specific time and location of the recorded trip. 
+	Additionally, it utilizes the External Interface to communicate with third-party mapping APIs for geocoding services and to calculate precise distances between coordinates, ensuring that the statistics displayed to the user, such as total distance covered and elevation gain, are accurate
+\end{itemize}
+
+\newpage
+\section{Deployment View}
+In this section of the document we focus on the deployment architecture of BBP and the motivations behind our design choices.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{2-deploymentView.pdf}
+	\caption{Deployment View}
+\end{figure}
+
+We divided our system into three main tiers—presentation, application, and data tiers (better explained in Section~\ref{sec:three-tier})—to better isolate common features between all tangible and intangible instances of the objects involved. Below is a list of all actors and components in the system:
+
+\begin{itemize}
+	\item \textbf{Personal Device}: a personal device consists of a sensor device (here modeled as the union of all the device's movement sensors) and an operating system that can be either Android or iOS. It is intended as a personal piece of hardware such as a smartphone or smartwatch carried by the user throughout the execution of the application. The personal device communicates with the Application Server through a local instance of the application: every request made by the Application to the Application Server follows a RESTful interaction style over HTTPS.
+	\item \textbf{API Gateway}: it is a node offered by a third party (such as AWS or Google Cloud Services) that provides a built-in Web Application Firewall (WAF) and a load balancer to distribute traffic among multiple Application Servers, thus avoiding single points of failure.
+	\item \textbf{Application Server}: it is a device that contains the core logic of the application and connects all the drivers required for the application to operate. It communicates with external APIs using REST and interacts with multiple databases through a continuously managed connection pool.
+	\item \textbf{Database}: we opted for multiple databases (one primary database and several read-only replicas) with a connection pool managed by the Application Server, ensuring that databases are protected by a limited number of open connections. This approach minimizes concurrency issues and prevents overload. The number of connections can be adjusted according to traffic patterns to achieve an optimal balance between hardware usage and system efficiency. Linux was chosen as the operating system due to its open-source nature, and MySQL for its robustness.
+\end{itemize}
+
+A closer look at some of the internal components of the system follows:
+
+\begin{itemize}
+	\item \textbf{Application Artifact}: the client-side application, primarily used as the presentation layer. It stores a signed JWT (JSON Web Token) used for authentication and is connected to all sensors required to detect movements in automated mode using cross-platform mobile frameworks.
+	\item \textbf{BBP Server App}: the core model of the application. It contains the business logic and ensures that all operations are coherent with user requests by following the Model-View-Controller (MVC) pattern. It hosts all managers and connects them to the necessary drivers used to interface with external tools.
+\end{itemize}
+
+\section{Runtime View}
+\label{sec:runtime_view}
+
+This section illustrates how the architectural components interact to fulfill the primary user scenarios. For each scenario, a description of the execution flow is provided, referencing the corresponding sequence of interactions.
+
+\subsection{User Login}
+\label{subsec:runtime_login}
+
+This scenario describes how a registered User authenticates into the system to access private functionalities.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/login.pdf}
+    \caption{Runtime view for 'User Login'}
+    \label{fig:seq_login}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process begins when the User inputs their credentials (email and password) into the \texttt{App}. The \texttt{App} performs a preliminary local validation (e.g., format checking) before initiating network communication. If valid, the \texttt{App} sends a request containing the credentials and the current \texttt{DeviceID} to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager}, acting as the system entry point, delegates the identity verification to the \texttt{Authentication Manager}. To retrieve the user's stored data (such as password hash and salt), the \texttt{Authentication Manager} invokes the \texttt{Query Manager}, which executes the specific \texttt{SELECT} query against the \texttt{DBMS}.
+
+Upon receiving the user data:
+\begin{itemize}
+    \item \textbf{If the user is not found or the password hash does not match:} The \texttt{Authentication Manager} throws a specific exception. The \texttt{Dashboard Manager} catches this and returns an appropriate error message (e.g., 401 Unauthorized) to the \texttt{App}.
+    \item \textbf{If the credentials are valid:} 
+    \begin{enumerate}
+        \item The \texttt{Authentication Manager} generates a new Session Token.
+        \item It invokes the \texttt{Query Manager} again to update the "Last Login" timestamp in the \texttt{DBMS}.
+        \item Control returns to the \texttt{Dashboard Manager}. Before finalizing the response, the \texttt{Dashboard Manager} coordinates with the \texttt{Notification Manager} to register the User's \texttt{DeviceID}, enabling future push notifications. The \texttt{Notification Manager} persists this association via the \texttt{Query Manager}.
+        \item Finally, the \texttt{Dashboard Manager} returns the Session Token and User Profile to the \texttt{App}, which stores the token and redirects the user to the homepage.
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{User Registration}
+\label{subsec:runtime_signup}
+
+This scenario details the procedure for onboarding a new User into the system. It involves a coordinated interaction between authentication mechanisms, profile management, and notification services to ensure a complete account setup.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/signup.pdf}
+    \caption{Runtime view for 'User Registration'}
+    \label{fig:seq_signup}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process begins when the User submits their registration data (email, password, and personal details such as name and surname) via the \texttt{App}. The \texttt{App} executes a local validation logic (e.g., password strength, email format) to filter out malformed requests. If the data is valid, the \texttt{App} sends a composite request to the \texttt{Dashboard Manager}, including the current \texttt{DeviceID}.
+
+The \texttt{Dashboard Manager} acts as the central orchestrator for this multi-step transaction, delegating specific responsibilities to the appropriate sub-components:
+
+\begin{itemize}
+    \item \textbf{Step 1: Credential Verification and Creation.} The \texttt{Dashboard Manager} first invokes the \texttt{Authentication Manager}. This component uses the \texttt{Query Manager} to check if the provided email is already registered in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If the user exists, an exception is thrown, and the \texttt{Dashboard Manager} returns a conflict error (e.g., 409 Conflict) to the \texttt{App}.
+        \item If the user is new, the \texttt{Authentication Manager} hashes the password and instructs the \texttt{Query Manager} to persist the new security credentials. It then returns the new unique \texttt{UserID} to the \texttt{Dashboard Manager}.
+    \end{itemize}
+    
+    \item \textbf{Step 2: Profile Initialization.} Upon successful credential creation, the \texttt{Dashboard Manager} calls the \texttt{Profile Manager}. This component takes the personal information (name, surname, etc.) and the newly created \texttt{UserID} to initialize the user's business profile in the \texttt{DBMS} via the \texttt{Query Manager}. This ensures a strict separation between authentication data and user profile data.
+
+    \item \textbf{Step 3: Device Registration and Auto-Login.} To complete the onboarding:
+    \begin{enumerate}
+        \item The \texttt{Dashboard Manager} interacts with the \texttt{Notification Manager} to register the User's \texttt{DeviceID}, enabling immediate push notification capabilities.
+        \item It requests a new Session Token from the \texttt{Authentication Manager} to allow for an "auto-login" experience, so the user does not need to re-enter credentials immediately after signing up.
+        \item Finally, the \texttt{Dashboard Manager} aggregates the result and sends the Session Token back to the \texttt{App}, which redirects the User to the homepage.
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{User Logout}
+\label{subsec:runtime_logout}
+
+This scenario illustrates the secure termination of a User's session. It is designed as a symmetric operation to the login process, ensuring that both the security context (session validity) and the operational context (notification delivery) are properly dismantled.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/logout.pdf}
+    \caption{Runtime view for 'User Logout'}
+    \label{fig:seq_logout}
+\end{figure}
+
+\textbf{Description of the flow:}
+The process is initiated when the User selects the logout option within the \texttt{App}. The \texttt{App} constructs a termination request containing the current Session Token and the Device ID, transmitting it to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager} orchestrates the teardown of the user's active context through two main phases:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Session Invalidation.} The \texttt{Dashboard Manager} first instructs the \texttt{Authentication Manager} to terminate the session.
+    \begin{itemize}
+        \item The \texttt{Authentication Manager} queries the \texttt{DBMS} via the \texttt{Query Manager} to verify the token's validity.
+        \item If valid, the token is physically removed or marked as expired in the database. This step is critical to prevent session replay attacks. If the session is already invalid (e.g., expired), the system handles the exception gracefully, ensuring the client is still forced to a logged-out state.
+    \end{itemize}
+    
+    \item \textbf{Phase 2: Notification Deregistration.} To ensure no further personal alerts are sent to the device, the \texttt{Dashboard Manager} coordinates with the \texttt{Notification Manager}.
+    \begin{itemize}
+        \item The \texttt{Notification Manager} invokes the \texttt{Query Manager} to remove the association between the user and the specific \texttt{DeviceID} in the \texttt{DBMS}. This mirrors the registration step performed during login/signup.
+    \end{itemize}
+\end{itemize}
+
+Upon the successful completion of server-side cleanup, the \texttt{Dashboard Manager} sends a confirmation to the \texttt{App}. The \texttt{App} then clears all local storage (cached tokens, user data) and redirects the User to the login screen.
+
+
+
+
+
+\subsection{Manual Trip Recording}
+\label{subsec:runtime_manual_recording}
+
+This scenario describes the process by which a Registered User manually reconstructs a trip by inputting a sequence of nodes and metadata.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/manual.pdf}
+    \caption{Runtime view for 'Manual Trip Recording'}
+    \label{fig:seq_manual}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User selects the "Manual Mode" on the \texttt{App}. After acknowledging the introductory information, the process unfolds in three distinct phases managed by the \texttt{Recording Manager} via the \texttt{Dashboard Manager}:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Path Reconstruction by Streets.} The User inputs the sequence of \textbf{street names} traversed during the trip.
+    \begin{itemize}
+        \item For each inserted street, the \texttt{Recording Manager} interacts with the \texttt{External Interface} to validate the street's existence and retrieve its geometry.
+        \item Crucially, the system performs a \textbf{topology check} (inference) to ensure the new street physically intersects or connects with the previous one. 
+        \item Upon successful validation of continuity, the street is added to the path list. The User can optionally associate metadata (e.g., obstacles or road status) to specific street segments. If a street is not found or not connected, the system prompts the User for correction.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Temporal Definition.} Once the sequence of streets is defined, the User concludes the session and manually inputs the \textbf{start and end times} of the trip.
+    \begin{itemize}
+        \item The \texttt{Recording Manager} validates that the start time strictly precedes the end time. Invalid ranges trigger an error response, prompting the User to re-enter the temporal data.
+    \end{itemize}
+
+    \item \textbf{Phase 3: Data Enrichment and Persistence.} Before saving, the system automatically enhances the reconstructed path:
+    \begin{enumerate}
+        \item The \texttt{Recording Manager} iterates through the inferred segments (derived from street intersections) and invokes the \texttt{External Interface} to request accurate distance metrics from the \texttt{External APIs}.
+        \item If the external service fails (e.g., timeout), the system attempts to estimate the distance based on the retrieved geometry to ensure process resilience.
+        \item Once all metrics are aggregated (calculating total distance and average speed based on the time range), the \texttt{Recording Manager} uses the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
+        \item Finally, a summary of the recorded activity is returned to the \texttt{App} for display.
+    \end{enumerate}
+\end{itemize}
+
+
+
+\subsection{Automated Trip Recording}
+\label{subsec:runtime_automated_recording}
+
+This scenario details the "hands-free" recording mode, where the system leverages device sensors to detect activity and automates data collection. It features a complex flow involving local hardware interaction and concurrent server-side processes to enrich trip data in real-time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/automated.pdf}
+    \caption{Runtime view for 'Automated Trip Recording'}
+    \label{fig:seq_automated}
+\end{figure}
+
+\textbf{Description of the flow:}
+The workflow is initiated when the User activates "Automated Mode" on the \texttt{App}. The process is structured into three logical phases, distinguishing between local detection and server-side processing:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Motion Detection and Initialization.} 
+    \begin{itemize}
+        \item The \texttt{App} enters a monitoring loop, periodically querying the local \texttt{Device} for sensor metrics (accelerometer, gyroscope, and position).
+        \item Upon detecting a pattern consistent with cycling, the \texttt{App} prompts the User for confirmation.
+        \item Once confirmed, the \texttt{App} sends an initialization request to the \texttt{Dashboard Manager}, which instructs the \texttt{Recording Manager} to create a new active session.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Concurrent Recording Loops.} During the active trip, the system orchestrates two parallel execution threads to optimize data accuracy and API usage:
+    \begin{enumerate}
+        \item \textbf{High-Frequency Telemetry Loop (every 1s):} The \texttt{App} streams GPS coordinates to the \texttt{Recording Manager}. For every new segment detected, the system invokes the \texttt{External Interface} to fetch precise distance metrics from \texttt{External APIs}. Exception handling is in place to skip segments if the external service is unreachable, ensuring continuous recording.
+        \item \textbf{Low-Frequency Environmental Loop (every 5 mins):} To enrich the trip data without exhausting API quotas, the \texttt{Recording Manager} periodically triggers a weather check. It uses the \texttt{Weather Interface} to retrieve conditions from the \texttt{Weather API}. If the API fails, the system gracefully defaults to a "Data not available" state rather than interrupting the flow.
+    \end{enumerate}
+
+    \item \textbf{Phase 3: Termination and Persistence.}
+    \begin{itemize}
+        \item When the User manually stops the recording, the \texttt{App} signals the termination to the \texttt{Dashboard Manager}.
+        \item The \texttt{Recording Manager} finalizes the calculations (aggregating distances and speeds) and invokes the \texttt{Query Manager} to persist the complete Trip object into the \texttt{DBMS}.
+        \item Finally, a summary of the performance metrics is returned to the User.
+    \end{itemize}
+\end{itemize}
+
+
+
+
+\subsection{Personal Trip Storage}
+\label{subsec:runtime_personal_storage}
+
+This scenario illustrates the management of the User's personal history of trips. It covers the retrieval of stored data and, crucially, the mechanism for toggling the visibility of a trip between "Private" (visible only to the owner) and "Public" (searchable by the community).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/personal.pdf}
+    \caption{Runtime view for 'Personal Trip Storage'}
+    \label{fig:seq_personal}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction is structured into two main logical phases: data retrieval and status modification.
+
+\begin{itemize}
+    \item \textbf{Phase 1: Retrieval of Trip Data.} 
+    When the User accesses the storage section, the \texttt{Dashboard Manager} delegates the request to the \texttt{Storage Manager}. This component interacts with the \texttt{Query Manager} to fetch the metadata list of trips owned by the specific User from the \texttt{DBMS}. A similar flow applies when the User requests the full details of a specific trip.
+
+    \item \textbf{Phase 2: Visibility Management (Publication/Unpublication).}
+    The core complexity lies in changing a trip's status. When the User toggles the visibility (e.g., "Make Public" or "Make Private"):
+    \begin{enumerate}
+        \item The request is routed to the \texttt{Publish Manager} (distinct from the Storage Manager). This component validates the request and invokes the \texttt{Query Manager} to execute an atomic \texttt{UPDATE} on the trip's status field in the \texttt{DBMS}.
+        \item \textbf{Success Path:} If the database confirms the update, the system acknowledges the change. For a "Make Public" action, this logically implies the trip becomes available for the system's "Data Merge" algorithms. The \texttt{App} updates the view immediately.
+        \item \textbf{Failure Path:} As shown in the diagram's alternative flows, if a persistence error occurs (e.g., database lock or connection failure), the system prioritizes consistency. The \texttt{Publish Manager} propagates the exception, the \texttt{Dashboard Manager} returns an error, and the \texttt{App} forces a reload of the list. This ensures the User never sees a "false positive" state where the UI shows "Public" while the DB remains "Private".
+    \end{enumerate}
+\end{itemize}
+
+
+
+\subsection{Path Search}
+\label{subsec:runtime_search}
+
+This scenario illustrates the workflow for retrieving bike paths based on geographical constraints. It emphasizes the validation logic performed by the backend to ensure data consistency before executing complex search queries.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/search.pdf}
+    \caption{Runtime view for 'Path Search'}
+    \label{fig:seq_search}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User inputs the desired start and end points via the \texttt{App} interface. The \texttt{App} displays a loading state and forwards the search criteria to the \texttt{Dashboard Manager}.
+
+The \texttt{Dashboard Manager} routes the request to the \texttt{Search Manager}, which orchestrates the retrieval process in two distinct logical steps to optimize resource usage:
+
+\begin{itemize}
+    \item \textbf{Step 1: Input Validation.} Before searching for paths, the \texttt{Search Manager} invokes the \texttt{Query Manager} to verify that both the start and end points correspond to valid locations existing in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If one or both points are invalid, the \texttt{Search Manager} raises an exception. The \texttt{App} receives an error message (e.g., "Points not valid"), displays a specific banner to the User, and reloads the search page to allow for correction.
+    \end{itemize}
+
+    \item \textbf{Step 2: Path Retrieval.} If the points are valid, the \texttt{Search Manager} instructs the \texttt{Query Manager} to execute the specific query to find all paths connecting the two locations.
+    \begin{itemize}
+        \item \textbf{No Paths Found:} If the query returns an empty result set, the system notifies the \texttt{App}. The User is informed via a "No paths found" banner, and the interface is reset for a new search.
+        \item \textbf{Search Successful:} If matching paths are found, the \texttt{Query Manager} returns the list of path objects. The \texttt{Search Manager} forwards this data through the \texttt{Dashboard Manager} to the \texttt{App}, which renders the results list for the User to browse.
+    \end{itemize}
+\end{itemize}
+
+
+
+\subsection{Browsing of Published Paths}
+\label{subsec:runtime_browse}
+
+This scenario depicts the workflow allowing Users to explore the catalog of publicly available bike paths within a specific geographical area. It highlights the filtering logic that ensures only content explicitly marked as "Public" is accessible to the general user base.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/browse.pdf}
+    \caption{Runtime view for 'Browsing of Published Paths'}
+    \label{fig:seq_browse}
+\end{figure}
+
+\textbf{Description of the flow:}
+The interaction begins when the User selects a geographical area of interest via the \texttt{App}. The interface displays a loading state while the request is forwarded to the \texttt{Dashboard Manager}, which delegates the operation to the \texttt{Search Manager}.
+
+The retrieval process is orchestrated in three sequential phases to ensure data consistency and validity:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Area Validation.} Before attempting any data retrieval, the \texttt{Search Manager} invokes the \texttt{Query Manager} to verify the existence of the requested area in the \texttt{DBMS}.
+    \begin{itemize}
+        \item If the area ID is malformed or non-existent, the process terminates immediately, and the \texttt{App} prompts the User to select a valid location.
+    \end{itemize}
+
+    \item \textbf{Phase 2: Public Paths Retrieval.} Upon successful validation, the \texttt{Search Manager} requests the list of paths associated with that area.
+    \begin{itemize}
+        \item Crucially, the query executed by the \texttt{Query Manager} includes a strict filter for \texttt{status = 'PUBLIC'}. Private trips stored by other users are strictly excluded at the database level.
+        \item If the query returns results, the list is displayed to the User. If the area contains no public paths, a specific notification is returned.
+    \end{itemize}
+
+    \item \textbf{Phase 3: Detail View.} The workflow concludes with the User selecting a specific path from the list.
+    \begin{enumerate}
+        \item The \texttt{App} requests the full details (including metrics like difficulty and rating) for the selected ID.
+        \item The \texttt{Search Manager} retrieves the complete object via the \texttt{Query Manager}.
+        \item Should an internal consistency error occur (e.g., the path was deleted moments before selection), the system handles the exception by notifying the User and refreshing the list, rather than crashing the application.
+    \end{enumerate}
+\end{itemize}
+
+
+
+
+\subsection{Obstacles Detection}
+\label{subsec:runtime_obstacles}
+
+This scenario details the advanced telemetry analysis performed during an automated recording session. It illustrates how the system leverages hardware sensor data (accelerometer and gyroscope) to identify potential road hazards and includes a human-in-the-loop verification step to ensure data accuracy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{sequence_diagrams/obstacles.pdf}
+    \caption{Runtime view for 'Obstacles Detection'}
+    \label{fig:seq_obstacles}
+\end{figure}
+
+\textbf{Description of the flow:}
+The workflow is an extension of the Automated Recording mode. Once the recording session is initialized via the \texttt{Dashboard Manager}, the process executes in two distinct temporal stages:
+
+\begin{itemize}
+    \item \textbf{Stage 1: Real-Time Detection and Enrichment.} 
+    During the active trip, the \texttt{App} streams sensor metrics to the \texttt{Recording Manager} at one-second intervals.
+    \begin{enumerate}
+        \item \textbf{Distance Calculation:} The system invokes the \texttt{External Interface} to fetch segment lengths from \texttt{External APIs}. As depicted in the diagram, this interaction is designed to be resilient: if the external service returns an error, the specific segment is skipped, allowing the recording loop to continue uninterrupted.
+        \item \textbf{Anomaly Recognition:} Simultaneously, the \texttt{Recording Manager} analyzes the accelerometer and gyroscope data. If a motion pattern consistent with a road anomaly (e.g., a pothole or bump) is detected, the current segment is internally flagged as a "Potential Obstacle".
+    \end{enumerate}
+
+    \item \textbf{Stage 2: Post-Trip User Verification.}
+    When the User stops the recording, the system does not immediately save the trip but initiates a verification sequence.
+    \begin{enumerate}
+        \item The \texttt{Recording Manager} returns the list of flagged segments to the \texttt{App}.
+        \item The \texttt{App} presents these locations to the User, asking for confirmation. The User iterates through the list, confirming ("Yes") or rejecting ("No") the presence of an obstacle.
+        \item The \texttt{Dashboard Manager} collects this feedback and updates the segment data accordingly, filtering out false positives.
+    \end{enumerate}
+
+    \item \textbf{Stage 3: Persistence.}
+    Once the verification loop is complete, the \texttt{Recording Manager} calculates the final trip metrics and invokes the \texttt{Query Manager} to persist the validated Trip object (including confirmed obstacles) into the \texttt{DBMS}.
+\end{itemize}
+
+
+
+
+
+
+
+\section{Component Interfaces}
+
+This section outlines the functional interfaces of the system components. Each interface lists the specific operations exposed by each component, strictly derived from the Runtime Sequence Diagrams.
+
+\subsection{Mobile Application}
+The client-side component acting as the interaction frontend and sensor data collector.
+
+        \texttt{validateFormat(input)}\\
+        \texttt{displayBanner(message)}\\
+        \texttt{analyzeMotionPattern()}\\
+        \texttt{getSensorData(Position, Accel, Gyro)}\\
+        \texttt{getPositionData()}\\
+        \texttt{storeSession(sessionTocken)}\\
+        \texttt{clearLocalSession()}\\
+        \texttt{startManualRecording()}\\
+        \texttt{inputStreet(streetName, optionalMetadata)}\\
+        \texttt{addAttribute(streetID, obstacleType, status)}\\
+        \texttt{clickFinishTrip()}\\
+        \texttt{inputTripTime(startTime, endTime)}\\
+        \texttt{selectAutomatedMode()}\\
+        \texttt{confirmStartRecording()}\\
+        \texttt{stopRecording()}\\
+        \texttt{acessPersonalStorage()}\\
+        \texttt{selectTrip(tripID)}\\
+        \texttt{clickMakePublic()}\\
+        \texttt{clickMakePrivate()}\\
+        \texttt{InputSearchCriteria(startPoint, endPoint)}\\
+        \texttt{showLoadingBanner()}\\
+        \texttt{browsePathsRequest(areaID)}\\
+        \texttt{selectPath(pathID)}\\
+        \texttt{startAutomatedMode()}\\
+
+
+
+\subsection{Dashboard Manager}
+The API Gateway that validates and routes client requests to specific logic managers.
+
+        \texttt{startSessionRequest(initialCoords)}\\
+        \texttt{stopSessionRequest(sessionID)}\\
+        \texttt{initRecordingSession(userID)}\\
+        \texttt{finalizeTripRequest(sessionID)}\\
+        \texttt{sendTelemetry(sessionID, metrics)}\\
+        \texttt{triggerWeatherCheck(sessionID, currentLoc)}\\
+        \texttt{addStreetRequest(sessionID, streetName)}\\
+        \texttt{updateSegmentAttributes(sessionID, streetID, data)}\\
+        \texttt{submitFeedback(segmentID, isConfirmed)}\\
+        \texttt{loginRequest(email, password, deviceID)}\\
+        \texttt{signUpRequest(email, pass, profileData, deviceID)}\\
+        \texttt{logoutRequest(sessionToken, deviceID)}\\
+        \texttt{getTripListRequest(userID)}\\
+        \texttt{getTripDetailRequest(tripID)}\\
+        \texttt{setVisibility(tripID, status)}\\
+        \texttt{searchPathRequest(startPoint, endPoint)}\\
+        \texttt{getPublicPaths(areaID)}\\
+        \texttt{getPathDetails(pathID)}
+        
+
+\subsection{Recording Manager}
+Handles active sessions, sensor fusion, and path inference.
+ì
+    
+        \texttt{initSession()}\\
+        \texttt{createSession()}\\
+        \texttt{processTelemetry(metrics)}\\
+        \texttt{processStreetSegment(streetName)}\\
+        \texttt{enrichWithWeather(location)}\\
+        \texttt{updateMetadata(streetID, data)}\\
+        \texttt{prepareVerificationData()}\\
+        \texttt{updateObstacleData(segmentID, isConfirmed)}\\
+        \texttt{validateAndProcessTrip(startTime, endTime)}\\
+        \texttt{finalizeTrip()}\\
+        \texttt{inferPathContinuity(prevStreet, currentStreet)}\\
+        \texttt{addSegmentToPath(streetData)}\\
+        \texttt{finalizeTripRequest(sessionID, startTime, endTime)}\\
+        \texttt{setTripTime(startTime, endTime)}\\
+        \texttt{aggregateMetrics(distance, speed)}\\
+        \texttt{estimateDistance(geometry)}\\
+        \texttt{calculateFinalScore()}\\
+        \texttt{createSegment(prevNode, currNode)}\\
+        \texttt{updateTripMetrics(distance)}\\
+        \texttt{appendWeatherData(weatherData)}\\
+        \texttt{calculateFinalMetrics()}\\
+        \texttt{analyzeMotionForObstacle(accel, gyro)}\\
+        \texttt{flagSegmentAsObstacle(segmentID)}
+
+
+\subsection{Authentication Manager}
+Manages credentials and session validity.
+    
+        \texttt{authenticateUser(email, password)}\\
+        \texttt{registerCredentials(email, password)}\\
+        \texttt{terminateSession(sessionToken)}\\
+        \texttt{generateToken(userID)}\\
+        \texttt{verifyPassword(password, hash, salt)}\\
+        \texttt{generateSalt()}\\
+        \texttt{hashPassword(password, salt)}
+
+\subsection{Search Manager}
+Executes pathfinding and public path retrieval logic.
+    
+        \texttt{findPaths(startPoint, endPoint)}\\
+        \texttt{retrievePublishedPaths(areaID)}\\
+        \texttt{retrievePathDetail(pathID)}
+
+\subsection{Storage Manager}
+Retrieves personal trip history.
+
+        \texttt{fetchUserTrips(userID)}\\
+        \texttt{fetchTripDetails(tripID)}ì
+
+\subsection{Publish Manager}
+Manages the visibility status of trips.
+
+    
+        \texttt{publishTrip(tripID)}\\
+        \texttt{unpublishTrip(tripID)}
+
+\subsection{Notification Manager}
+Handles device tokens for push notifications.
+
+    
+        \texttt{registerDeviceToken(userID, deviceID)}\\
+        \texttt{registerDevice(newUserID, deviceID)}\\
+        \texttt{unregisterDevice(deviceID)}
+
+\subsection{External \& Weather Interfaces}
+Wrappers for third-party REST APIs.
+
+    
+        \texttt{calculateDistance(nodeA, nodeB)}\\
+        \texttt{getSegmentDistance(nodeStart, nodeEnd)}\\
+        \texttt{resolveStreetGeometry(streetName)}\\
+        \texttt{getCurrentConditions(location)}\\
+        \texttt{calculateDistance(nnodeA, nodeB)}
+
+\subsection{Query Manager}
+DAO layer executing all database transactions.
+
+        \texttt{saveTrip(tripObject)}\\
+        \texttt{saveCompleteTrip(tripData)}\\
+        \texttt{selectTripsByOwner(userID)}\\
+        \texttt{selectTripFullData(tripID)}\\
+        \texttt{updateTripStatus(tripID, status)}\\
+        \texttt{fetchUserByEmail(email)}\\
+        \texttt{createAuthUser(email, hash, salt)}\\
+        \texttt{checkEmailExistence(email)}\\
+        \texttt{insertProfileDetails(newUserID, name, surname...)}\\
+        \texttt{retrieveSessionStatus(sessionToken)}\\
+        \texttt{deleteSession(sessionToken)}\\
+        \texttt{executeUpdateLastLogin(userID, timestamp)}\\
+        \texttt{checkAreaValidity(areaID)}\\
+        \texttt{fetchPathsByAreaAndStatus(areaID, status)}\\
+        \texttt{fetchFullPathData(pathID)}\\
+        \texttt{validateLocationExistence(startPoint, endPoint)}\\
+        \texttt{queryPathsByEndpoints(startPoint, endPoint)}\\
+        \texttt{storeDeviceToken(userID, deviceID)}\\
+        \texttt{removeDeviceToken(deviceID)}\\
+        \texttt{retrieveSessionStatus(sessionToken)}
+
+\subsection{Profile Manager}
+Handles user profile informations.
+
+        \texttt{createProfile(newuserID, profileData)}
+
+
+
+
+
+
+\section{Styles and Patterns}
+\label{sec:three-tier}
+
+BBP will be developed using the client-server paradigm integrated with a three-tier architecture and the Model-View-Controller pattern. The goal of this combined architecture is to achieve a clear separation of concerns among system components and improve control over each tier. The tiers involved are:
+
+\begin{itemize}
+	\item \textbf{Presentation Tier}: this tier serves as the view component of the application and contains software that interacts directly with the user's hardware (i.e., the personal device and its sensors). It represents the top-level tier and is designed to be mostly stateless, although some user information is stored through JWT tokens for authentication. Its main functionality is to display information and available actions to the user, as well as present outputs generated by the backend. The presentation tier does not contain core business logic, preventing users from modifying it locally to perform unauthorized actions and keeping the application lightweight in terms of memory usage. To ensure platform independence, Flutter was adopted to provide a unified abstraction layer for accessing sensor information across operating systems.
+	
+	\item \textbf{Application Tier}: this tier contains the core logic of the system and is composed of the Application Servers. It validates and executes user actions according to the current system state. Acting as a middle tier, it processes data received from the presentation tier and returns meaningful information to the user. Multiple Application Servers are deployed to enable scalability; with the use of an API Gateway equipped with a load balancer, requests can be routed consistently to specific servers using the JWT as an identifier. In case of server failure, users can be transparently rerouted to other servers, avoiding downtime.
+	
+	\item \textbf{Data Tier}: this tier represents the main repository of user and application data. It consists of a primary database and multiple secondary read-only replicas, all accessed through a connection pool that regulates the number of active connections. This architecture avoids data-tier downtime by allowing replica promotion in case of primary database failure, while preventing data inconsistency issues that may arise from having multiple writable databases.
+\end{itemize}
+
+In addition to the three tiers, a third-party API Gateway connects the presentation tier to the application tier. To satisfy scalability and security requirements, the API Gateway includes a \textbf{load balancer} to distribute incoming connections and a \textbf{Web Application Firewall} to protect against common attacks. AWS and Google Cloud Services are examples of providers offering such solutions.
+
+The overall architecture follows a \textbf{client-server} interaction model in which most operations are event-driven. The client initiates the majority of transactions, except for server-generated notifications (e.g., automated mode activation). All client requests are validated by server-side logic, ensuring that communication errors and malicious behaviors are intercepted. Since communication is handled through \textbf{REST} over HTTPS, error messages can be clearly encoded and traced in both front-end and back-end scenarios.
+
+The primary design pattern adopted is \textbf{Model-View-Controller}. The Model contains the logical components that manage and process application data, the View represents the graphical interface presented to the user through the client application, and the Controller handles user input and coordinates interactions between the Model and the View.
+
+\section{Other Design Decisions}
+
+\subsection{JWT}
+JWT was chosen for authentication because, when combined with the load balancer deployed within the API Gateway, it enables secure login and registration while supporting scalability. Token expiration times (time-to-live) can be customized to allow either long-lived sessions or frequent re-authentication, providing flexibility in security policies.
+
+\subsection{Avoidance of Single Points of Failure}
+The use of an API Gateway, a homogeneous set of Application Servers, and load-balanced routing eliminates single points of failure. This design allows the system to scale horizontally by adding servers, thereby increasing robustness and the ability to handle higher request volumes.
+
+\subsection{Microservices}
+A microservices-based architecture was adopted to improve functional scalability. Each manager is implemented as an isolated service coordinated through notification and query mechanisms. This approach facilitates targeted testing, simplifies maintenance, and improves error identification and resolution.
+
+\subsection{Cross-Platform Availability}
+By using Flutter, a single codebase is maintained for the client-side application, improving code readability and maintainability through a shared operating system abstraction. This choice also enables BBP to reach a wider user base by supporting multiple platforms.

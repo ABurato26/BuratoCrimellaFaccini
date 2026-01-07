@@ -1,0 +1,154 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "Registered\nUser" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Recording\nManager" as recMan
+    participant "External\nInterface" as extInt
+    participant "Query\nManager" as queryMan
+end box
+participant "External\nAPIs" as extApi <<System>>
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : startManualRecording()
+activate app
+app -> app : displayInfoBanner()
+app --> user : Manual Input Form
+
+' --- INITIALIZATION ---
+app -> dashMan : initRecordingSession(userID)
+activate dashMan
+dashMan -> recMan : createSession()
+activate recMan
+recMan --> dashMan : sessionID
+deactivate recMan
+dashMan --> app : HTTP 200 (sessionID)
+deactivate dashMan
+
+' --- LOOP: INSERTION OF STREETS (User Logic) ---
+note right of user: The user insert the sequence of streets\n(e.g. Viale Tunisia, Viale V. Pisani)
+
+loop while user wants to add streets
+    user -> app : inputStreet(streetName, optionalMetadata)
+    
+    app -> dashMan : addStreetRequest(sessionID, streetName)
+    activate dashMan
+    dashMan -> recMan : processStreetSegment(streetName)
+    activate recMan
+
+    ' --- INFERENCE LOGIC: RESOLVE STREET & CONNECTIVITY ---
+    recMan -> extInt : resolveStreetGeometry(streetName)
+    activate extInt
+    extInt -> extApi : getGeoData(streetName)
+    activate extApi
+    
+    alt Street Not Found / API Error
+        extApi --> extInt : error/empty
+        extInt --> recMan : null
+        recMan --> dashMan : InvalidStreetException
+        dashMan --> app : HTTP 404 (Street not found)
+        app --> user : "Street name not valid" message
+    else Street Found
+        extApi --> extInt : streetGeometryData
+        deactivate extApi
+        extInt --> recMan : streetGeometryData
+        deactivate extInt
+        
+        ' Il sistema inferisce la connessione con la strada precedente
+        recMan -> recMan : inferPathContinuity(prevStreet, currentStreet)
+        
+        alt Continuity Valid (Intersection Found)
+            recMan -> recMan : addSegmentToPath(streetData)
+            recMan --> dashMan : StreetData (Confirmed)
+            dashMan --> app : HTTP 200 OK
+            app --> user : Updated Path List View
+        else Continuity Invalid (Streets do not intersect)
+             recMan --> dashMan : TopologyException
+             dashMan --> app : HTTP 409 (Not Connected)
+             app --> user : "Roads must be connected" message
+        end
+    end
+    deactivate recMan
+    deactivate dashMan
+end
+
+' --- OPTIONAL: ADD ATTRIBUTES (Potholes/Status) ---
+opt User adds details to specific segments
+    user -> app : addAttribute(streetID, obstacleType, status)
+    app -> dashMan : updateSegmentAttributes(sessionID, streetID, data)
+    activate dashMan
+    dashMan -> recMan : updateMetadata(streetID, data)
+    recMan --> dashMan : true
+    dashMan --> app : HTTP 200 OK
+    deactivate dashMan
+end
+
+' --- FINALIZATION ---
+user -> app : clickFinishTrip()
+app --> user : Time Input Form
+user -> app : inputTripTimes(startTime, endTime)
+
+app -> dashMan : finalizeTripRequest(sessionID, startTime, endTime)
+activate dashMan
+dashMan -> recMan : validateAndProcessTrip(startTime, endTime)
+activate recMan
+
+alt startTime > endTime
+    recMan --> dashMan : InvalidTimeRangeException
+    dashMan --> app : HTTP 400 (Invalid Time Range)
+    app --> user : "Invalid Time Range" message
+else valid time range
+    recMan -> recMan : setTripTimes(startTime, endTime)
+    
+    ' --- LOOP 2: STATISTICS CALCULATION (System Inference) ---
+    '
+    loop for each inferred segment in path
+        recMan -> extInt : getSegmentDistance(nodeStart, nodeEnd)
+        activate extInt
+        extInt -> extApi : fetchDistance(coordsA, coordsB)
+        activate extApi
+        
+        alt API Call Successful
+            extApi --> extInt : distanceValue
+            extInt --> recMan : distanceValue
+            recMan -> recMan : aggregateMetrics(distance, speed)
+        else API Error
+            extApi --> extInt : error
+            deactivate extApi
+            extInt --> recMan : null
+            deactivate extInt
+            recMan -> recMan : estimateDistance(geometry)
+        end
+    end
+
+    recMan -> recMan : calculateFinalScore()
+    
+    ' Persist Trip
+    recMan -> queryMan : saveCompleteTrip(tripData)
+    activate queryMan
+    queryMan -> db : INSERT INTO Trips ...
+    activate db
+    db --> queryMan : success
+    deactivate db
+    queryMan --> recMan : tripID
+    deactivate queryMan
+
+    recMan --> dashMan : TripSummaryData
+    deactivate recMan
+
+    dashMan --> app : HTTP 200 (TripSummaryData)
+    deactivate dashMan
+    
+    app --> user : Trip Summary Page
+end
+
+deactivate app
+deactivate user
+@enduml

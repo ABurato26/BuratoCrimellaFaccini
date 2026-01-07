@@ -1,0 +1,107 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Search\nManager" as searchMan
+    participant "Query\nManager" as queryMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : browsePathsRequest(areaID)
+activate app
+app -> app : showLoadingState()
+
+app -> dashMan : getPublicPaths(areaID)
+activate dashMan
+dashMan -> searchMan : retrievePublishedPaths(areaID)
+activate searchMan
+
+' --- VISIBLE SECTION TITLE ---
+
+
+searchMan -> queryMan : checkAreaValidity(areaID)
+activate queryMan
+queryMan -> db : SELECT count(*) FROM Areas WHERE ...
+activate db
+db --> queryMan : areaExists
+deactivate db
+queryMan --> searchMan : isValid
+deactivate queryMan
+
+alt Area Not Valid
+    searchMan --> dashMan : InvalidAreaException
+    dashMan --> app : HTTP 400 (Invalid Area)
+    app --> user : "Area not valid" Message
+    app -> app : loadEmptySearchPage()
+
+else Area Valid
+    ' --- VISIBLE SECTION TITLE ---
+    
+    
+    searchMan -> queryMan : fetchPathsByAreaAndStatus(areaID, 'PUBLIC')
+    activate queryMan
+    queryMan -> db : SELECT * FROM Paths WHERE area = ? AND status = 'PUBLIC'
+    activate db
+    db --> queryMan : PathListResultSet
+    deactivate db
+    queryMan --> searchMan : List<PathMetadata>
+    deactivate queryMan
+
+    alt No Public Paths Found
+        searchMan --> dashMan : Empty List
+        dashMan --> app : HTTP 404 (No paths found)
+        app --> user : "No public path found" Message
+        app -> app : loadEmptySearchPage()
+
+    else Paths Found (Success)
+        searchMan --> dashMan : List<PathMetadata>
+        deactivate searchMan
+        dashMan --> app : HTTP 200 (List<PathMetadata>)
+        deactivate dashMan
+        app --> user : Path List View
+        
+        ' --- VISIBLE SECTION TITLE ---
+        
+        
+        user -> app : selectPath(pathID)
+        app -> dashMan : getPathDetails(pathID)
+        activate dashMan
+        dashMan -> searchMan : retrievePathDetail(pathID)
+        activate searchMan
+        searchMan -> queryMan : fetchFullPathData(pathID)
+        activate queryMan
+        queryMan -> db : SELECT ... FROM Paths WHERE id = ?
+        activate db
+        
+        alt Internal Error / Path Not Found
+            db --> queryMan : error / null
+            deactivate db
+            queryMan --> searchMan : PersistenceException
+            deactivate queryMan
+            searchMan --> dashMan : InternalServerError
+            deactivate searchMan
+            dashMan --> app : HTTP 500 (Detailed data unavailable)
+            deactivate dashMan
+            app --> user : "Error loading details" Message
+            app -> app : reloadPathList()
+        
+        else Success (Detail Retrieval)
+            queryMan --> searchMan : PathObject
+            searchMan --> dashMan : PathObject
+            dashMan --> app : HTTP 200 (PathObject)
+            app --> user : Path Detail View (Stats & Map)
+        end
+    end
+end
+
+deactivate app
+deactivate user
+@enduml

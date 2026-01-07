@@ -1,0 +1,97 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 25
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Authentication\nManager" as authMan
+    participant "Query\nManager" as queryMan
+    participant "Notification\nManager" as notifMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : inputCredentials(email, password)
+activate app
+
+app -> app : validateFormat(email)
+note right: Local validation before\nnetwork request
+
+alt invalid format
+    app --> user : "Invalid Format Error"
+else valid format
+
+    app -> dashMan : loginRequest(email, password, deviceID)
+    activate dashMan
+
+    dashMan -> authMan : authenticateUser(email, password)
+    activate authMan
+
+    authMan -> queryMan : fetchUserByEmail(email)
+    activate queryMan
+    
+    queryMan -> db : SELECT * FROM Users WHERE email = ?
+    activate db
+    db --> queryMan : ResultSet (UserRow)
+    deactivate db
+    
+    queryMan --> authMan : UserEntity (hash, salt, status) OR null
+    deactivate queryMan
+
+    alt user not found
+        authMan --> dashMan : UserNotFoundException
+        dashMan --> app : HTTP 404 (Account not found)
+        app --> user : "User not registered" message
+    
+    else user found
+        authMan -> authMan : verifyPassword(password, storedHash, salt)
+        
+        alt password mismatch
+            authMan --> dashMan : InvalidCredentialsException
+            dashMan --> app : HTTP 401 (Invalid password)
+            app --> user : "Wrong credentials" message
+        
+        else password matches
+            authMan -> authMan : generateSessionToken(userID)
+            
+            authMan -> queryMan : executeUpdateLastLogin(userID, timestamp)
+            activate queryMan
+            queryMan -> db : UPDATE Users SET last_login = ? ...
+            activate db
+            db --> queryMan : success
+            deactivate db
+            queryMan --> authMan : true
+            deactivate queryMan
+            
+            authMan --> dashMan : SessionToken, UserProfile
+            deactivate authMan
+
+            dashMan -> notifMan : registerDeviceToken(userID, deviceID)
+            activate notifMan
+            notifMan -> queryMan : storeDeviceToken(userID, deviceID)
+            activate queryMan
+            queryMan -> db : INSERT/UPDATE DeviceTokens ...
+            activate db
+            db --> queryMan : success
+            deactivate db
+            queryMan --> notifMan : success
+            deactivate queryMan
+            notifMan --> dashMan : true
+            deactivate notifMan
+
+            dashMan --> app : HTTP 200 OK (SessionToken, UserProfile)
+            deactivate dashMan
+
+            app -> app : storeSession(SessionToken)
+            app --> user : Home Page View
+        end
+    end
+end
+deactivate app
+deactivate user
+@enduml

@@ -1,0 +1,73 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 350
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "App" as app <<Mobile>>
+box "BBP Server Logic" #F5F5F5
+    participant "Dashboard\nManager" as dashMan
+    participant "Search\nManager" as searchMan
+    participant "Query\nManager" as queryMan
+end box
+database "DBMS" as db <<Database>>
+
+activate user
+user -> app : inputSearchCriteria(startPoint, endPoint)
+activate app
+app -> app : showLoadingBanner()
+
+app -> dashMan : searchPathRequest(startPoint, endPoint)
+activate dashMan
+dashMan -> searchMan : findPaths(startPoint, endPoint)
+activate searchMan
+
+' --- STEP 1: VALIDATION ---
+searchMan -> queryMan : validateLocationExistence(startPoint, endPoint)
+activate queryMan
+queryMan -> db : SELECT count(*) FROM Locations ...
+activate db
+db --> queryMan : validationResult
+deactivate db
+queryMan --> searchMan : isValid
+deactivate queryMan
+
+alt Points not valid
+    searchMan --> dashMan : InvalidPointsException
+    dashMan --> app : HTTP 400 (Invalid Points)
+    app --> user : "Points not valid" Message
+    app -> app : reloadEmptySearchPage()
+
+else Points valid
+    ' --- STEP 2: PATH RETRIEVAL ---
+    searchMan -> queryMan : queryPathsByEndpoints(startPoint, endPoint)
+    activate queryMan
+    queryMan -> db : SELECT * FROM Paths WHERE ...
+    activate db
+    db --> queryMan : PathResultSet
+    deactivate db
+    queryMan --> searchMan : List<Path>
+    deactivate queryMan
+
+    alt No paths found (List is empty)
+        searchMan --> dashMan : Empty List
+        dashMan --> app : HTTP 404 (No paths found)
+        deactivate dashMan
+        app --> user : "No paths found" Message
+        app -> app : reloadEmptySearchPage()
+    
+    else Paths found (Success)
+        searchMan --> dashMan : List<Path>
+        deactivate searchMan
+        activate dashMan
+        dashMan --> app : HTTP 200 (List<Path>)
+        deactivate dashMan
+        app --> user : Search Results View
+    end
+end
+
+deactivate app
+deactivate user
+@enduml
