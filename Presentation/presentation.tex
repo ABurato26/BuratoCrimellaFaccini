@@ -1,0 +1,119 @@
+\documentclass{beamer}
+% \documentclass[aspectratio=169]{beamer} % Uncomment for 16:9
+
+% ---------- Encoding & Language ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % Not strictly needed on modern LaTeX, but safe
+\usepackage{lmodern}        % Better vector fonts
+
+% ---------- Math & Symbols ----------
+\usepackage{amsmath, amssymb}
+
+% ---------- Graphics ----------
+\usepackage{graphicx}
+
+% ---------- Tables ----------
+\usepackage{booktabs}
+
+% ---------- Colors & Hyperlinks ----------
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% ---------- Code Listings (optional) ----------
+\usepackage{listings}
+
+% ---------- Theme ----------
+\usepackage{CNU} % Custom Beamer theme
+
+% ---------- Custom Commands -----------
+\newcommand{\folder}{Images/}	% Custom command to add absolute path
+
+% ---------- Metadata ----------
+\title{BBP}
+\subtitle{RASD \& DD Presentation}
+\author{Alessandro Burato, Gabriele Crimella, Davide Faccini}
+\institute{Politecnico di Milano}
+\date{\today}
+
+% ---------- Listings setup ----------
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{halfgray}{gray}{0.55}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{deepblue},
+    stringstyle=\color{deepgreen},
+    commentstyle=\color{halfgray},
+    numbers=left,
+    numberstyle=\tiny\color{halfgray},
+    frame=single,
+    breaklines=true
+}
+
+\begin{document}
+
+% ---------- Title ----------
+\begin{frame}
+    \titlepage
+    \vspace{1em}
+    \begin{center}
+        \includegraphics[width=0.3\linewidth]{\folder logo_polimi_scritta2.eps}
+    \end{center}
+\end{frame}
+
+% ---------- Outline ----------
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
+
+% ---------- Content ----------
+\section{RASD}
+
+\subsection{Introduction}
+\begin{frame}{Project Background}
+    pippo
+\end{frame}
+
+\subsection{Overall Description}
+\begin{frame}{Project Background}
+    pippo
+\end{frame}
+
+\subsection{Specific Requirements}
+\begin{frame}{Project Background}
+    pippo
+\end{frame}
+
+\subsection{Alloy}
+\begin{frame}{Project Background}
+    pippo
+\end{frame}
+
+\section{DD}
+\begin{frame}{Proposed Approach}
+    \begin{itemize}
+        \item System architecture
+        \item Key algorithms or techniques
+        \item Tools and technologies
+    \end{itemize}
+\end{frame}
+
+\section{References}
+\begin{frame}{References}
+    \bibliographystyle{plain}
+    \begin{thebibliography}{9}
+        \bibitem{article1}
+        Author,
+        \emph{Title of the Paper},
+        Journal, Year.
+    \end{thebibliography}
+\end{frame}
+
+\begin{frame}
+    \centering
+    {\Huge Thank you!}
+\end{frame}
+
+\end{document}
