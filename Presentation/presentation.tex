@@ -73,12 +73,63 @@
 
 \subsection{Introduction}
 \begin{frame}{Introduction}
-    pippo
+    \begin{itemize}
+        \item Key goals (G1-G14):
+        \begin{itemize}
+            \item \textbf{Data Acquisition}: Automated tracking \& manual reporting (G10, G11).
+            \item \textbf{Data Quality}: Merging user contributions (G8) \& Anomaly detection (G9).
+            \item \textbf{Value}: Path optimality scoring based on road status (G5).
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Phenomena}
+    \begin{itemize}
+    \item World Phenomena (WP):
+    \begin{itemize}
+        \item \textit{Physical movement}
+        \item \textit{Road status changes (potholes)}
+        \item \textit{Weather conditions}
+    \end{itemize}
+    \item Shared Phenomena (SP):
+    \begin{itemize}
+        \item{World-controlled}:
+        \begin{itemize}
+            \item \textit{Sensors transmitting}
+            \item \textit{User inputs}
+        \end{itemize}
+        \item{Machine-controlled}:
+        \begin{itemize}
+            \item \textit{Map visualization}
+            \item \textit{Confirmation requests}
+        \end{itemize}
+        \end{itemize}
+    \end{itemize}
 \end{frame}
 
 \subsection{Overall Description}
-\begin{frame}{Overall Description}
-    pippo
+\begin{frame}{Class diagram}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.4]{\folder class_diagram_short.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{System Dynamics \& Data Lifecycle}
+    \begin{itemize}
+        \item \textbf{Acquisition Strategy}: hybrid model using \textbf{inference} (speed thresholds) and \textbf{topological reconstruction} (manual)
+        \item \textbf{Validation Pattern}: sensor anomalies are flagged as "\textbf{candidates}" to filter \textbf{false positives} via user confirmation
+        \item \textbf{Consistency Logic}: server-side \textbf{weighting algorithm} resolves conflicts based on data freshness and consensus
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{State Diagram Example}
+    \textbf{Path Aggregation}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.28]{\folder matching.pdf}
+	\end{figure}
+
 \end{frame}
 
 \subsection{Specific Requirements}
