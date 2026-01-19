@@ -1,0 +1,248 @@
+\documentclass{beamer}
+% \documentclass[aspectratio=169]{beamer} % Uncomment for 16:9
+
+% ---------- Encoding & Language ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % Not strictly needed on modern LaTeX, but safe
+\usepackage{lmodern}        % Better vector fonts
+
+% ---------- Math & Symbols ----------
+\usepackage{amsmath, amssymb}
+
+% ---------- Graphics ----------
+\usepackage{graphicx}
+
+% ---------- Tables ----------
+\usepackage{booktabs}
+
+% ---------- Colors & Hyperlinks ----------
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% ---------- Code Listings (optional) ----------
+\usepackage{listings}
+
+% ---------- Theme ----------
+\usepackage{CNU} % Custom Beamer theme
+
+% ---------- Custom Commands -----------
+\newcommand{\folder}{Images/}	% Custom command to add absolute path
+
+% ---------- Metadata ----------
+\title{BBP}
+\subtitle{RASD \& DD Presentation}
+\author{Alessandro Burato, Gabriele Crimella, Davide Faccini}
+\institute{Politecnico di Milano}
+\date{\today}
+
+% ---------- Listings setup ----------
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{halfgray}{gray}{0.55}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{deepblue},
+    stringstyle=\color{deepgreen},
+    commentstyle=\color{halfgray},
+    numbers=left,
+    numberstyle=\tiny\color{halfgray},
+    frame=single,
+    breaklines=true
+}
+
+\begin{document}
+
+% ---------- Title ----------
+\begin{frame}
+    \titlepage
+    \vspace{1em}
+    \begin{center}
+        \includegraphics[width=0.3\linewidth]{\folder logo_polimi_scritta2.eps}
+    \end{center}
+\end{frame}
+
+% ---------- Outline ----------
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
+
+% ---------- Content ----------
+\section{RASD}
+
+\subsection{Introduction}
+\begin{frame}{Goals}
+    \centering
+    \includegraphics[width=\textwidth]{Images/goals.png}
+\end{frame}
+
+\begin{frame}{Phenomena}
+    \begin{itemize}
+    \item World Phenomena (WP):
+    \begin{itemize}
+        \item \textit{Physical movement}
+        \item \textit{Road status changes (potholes)}
+        \item \textit{Weather conditions}
+    \end{itemize}
+    \item Shared Phenomena (SP):
+    \begin{itemize}
+        \item{World-controlled}:
+        \begin{itemize}
+            \item \textit{Sensors transmitting}
+            \item \textit{User inputs}
+        \end{itemize}
+        \item{Machine-controlled}:
+        \begin{itemize}
+            \item \textit{Map visualization}
+            \item \textit{Confirmation requests}
+        \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\subsection{Overall Description}
+\begin{frame}{Class diagram}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.4]{\folder class_diagram_short.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{System Dynamics \& Data Lifecycle}
+    \begin{itemize}
+        \item \textbf{Acquisition Strategy}: hybrid model using \textbf{inference} (speed thresholds) and \textbf{topological reconstruction} (manual)
+        \item \textbf{Validation Pattern}: sensor anomalies are flagged as "\textbf{candidates}" to filter \textbf{false positives} via user confirmation
+        \item \textbf{Consistency Logic}: server-side \textbf{weighting algorithm} resolves conflicts based on data freshness and consensus
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{State Diagram Example}
+    \textbf{Path Aggregation}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.28]{\folder matching.pdf}
+	\end{figure}
+
+\end{frame}
+
+\subsection{Specific Requirements}
+\begin{frame}{Specific Requirements}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.3]{\folder Diagr_UseCases.drawio.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Specific Requirements}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.19]{\folder Diagr_ManualMode.drawio.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Specific Requirements}
+    \begin{itemize}
+    		\item \textbf{Realibility}
+    		\item \textbf{Availability}
+    		\item \textbf{Security}
+    		\item \textbf{Maintainability}
+    		\item \textbf{Portability}
+    \end{itemize}
+\end{frame}
+
+\subsection{Alloy}
+\begin{frame}{Alloy}
+    \begin{itemize}
+		\item \textbf{Static model analysis}
+		\item \textbf{Merging of two paths}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Static Model Analysis}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth]{\folder alloy_General.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Merging of Two Paths}
+	\begin{columns}
+
+    		\column{0.5\textwidth}
+    		\centering
+    		\includegraphics[width=\textwidth]{\folder alloy_Merging.pdf}
+
+    		\column{0.5\textwidth}
+    		\centering
+    		\includegraphics[width=\textwidth]{\folder alloy_Merging2.pdf}
+
+\end{columns}
+\end{frame}
+
+\section{DD}
+
+\subsection{Architectural Design}
+\begin{frame}{Architectural Design}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.7]{\folder Overview.drawio.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Deployment View}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.31]{\folder 2-deploymentView.pdf}
+    \end{figure}
+
+\end{frame}
+
+\begin{frame}{Architectural Design}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[scale = 0.25]{\folder LowLevel.drawio.pdf}
+	\end{figure}
+\end{frame}
+
+\subsection{Implementation, Integration and Test Plan}
+
+\begin{frame}{Query and Notification Manager}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\textwidth]{\folder 5-queryNotificationManagerTesting.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Parallel Integration}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{\folder 5-parallelManagerTesting.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Dashboard Manager}
+    \begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{\folder 5-dashboardManagerTesting.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{System Testing Strategy}
+    \begin{itemize}
+    		\item \textbf{Functional Testing}
+    		\item \textbf{Load Testing}
+    		\item \textbf{Performance Testing}
+    		\item \textbf{Stress Testing}
+    		\item \textbf{User Interface Testing}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \centering
+    {\Huge Thank you!}
+\end{frame}
+
+
+
+\end{document}
